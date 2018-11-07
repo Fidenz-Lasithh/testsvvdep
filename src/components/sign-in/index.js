@@ -1,17 +1,21 @@
-import React from 'react';
-import { Subscribe } from 'unstated';
+import React, { Component } from 'react';
 
-import UserContainer from '../../containers/user.container';
-import SignIn from './sign-in';;
+class SignIn extends Component {
+  constructor(props) {
+    super(props);
+  }
 
-const SignInComponent = () => {
-  return (
-    <Subscribe to={[UserContainer]}>
-      {user => (
-        <SignIn userContainer={user} />
-      )}
-    </Subscribe>
-  )
+  async componentDidMount() {
+    await this.props.userContainer.signIn();
+  }
+
+  render() {
+    return (
+      <div>
+        sign in module.
+      </div>
+    )
+  }
 }
 
-export default SignInComponent;
+export default SignIn;

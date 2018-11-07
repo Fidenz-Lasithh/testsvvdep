@@ -1,7 +1,7 @@
-import APIhandler from './api-handler';
+import { APIHandler } from './api-handler';
 
 const signIn = () => {
-  return APIhandler.get('/request?foo=bar&foo=baz');
+  return APIHandler.get('/request?foo=bar&foo=baz');
 };
 
 export {
