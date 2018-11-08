@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
 class SignIn extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   async componentDidMount() {
     await this.props.userContainer.signIn();
   }
@@ -12,7 +8,7 @@ class SignIn extends Component {
   render() {
     return (
       <div>
-        sign in module.
+        {/* sign in module. */}
       </div>
     )
   }

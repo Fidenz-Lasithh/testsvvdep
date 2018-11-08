@@ -12,3 +12,27 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.ui.vertical.menu>.item:first-child {
+  text-align: left;
+}
+
+.ui.horizontal.segments>.route-segment {
+  max-width: 335px;
+}
+
+.ui.horizontal.segments {
+  min-height: calc(100vh - 115px);
+}
+
+.ui.huge.menu {
+  font-size: 1rem;
+}
+
+.ui.horizontal.label {
+  margin: 0;
+}
+
+.ui.menu .header.item, .ui.vertical.menu .header.item {
+  text-align: center;
+}

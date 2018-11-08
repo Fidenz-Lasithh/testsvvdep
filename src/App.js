@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Subscribe } from 'unstated';
+import { Segment } from 'semantic-ui-react';
 
 //Containers
 import UserContainer from './containers/user.container';
@@ -17,16 +18,18 @@ class App extends Component {
     return (
       <Subscribe to={[UserContainer, MapContainer]}>
         {(user, map) => (
-          <div className="App">
+          <Segment basic>
             <BrowserRouter>
               <Fragment>
                 <SignIn userContainer={user} />
                 <Nav />
-                <Routes />
-                <Map mapContainer={map} />
+                <Segment.Group horizontal>
+                  <Routes />
+                  <Map mapContainer={map} />
+                </Segment.Group>
               </Fragment>
             </BrowserRouter>
-          </div>
+          </Segment>
         )}
       </Subscribe>
     );

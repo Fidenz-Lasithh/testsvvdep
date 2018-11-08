@@ -4,7 +4,7 @@ import { Segment } from 'semantic-ui-react';
 class Map extends Component {
   render() {
     return (
-      <Segment>
+      <Segment floated='right' size='large'>
         <h1>Map</h1>
       </Segment>
     )
