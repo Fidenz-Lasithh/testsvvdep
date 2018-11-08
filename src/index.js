@@ -4,6 +4,10 @@ import { Provider } from 'unstated';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+//import CSS
+import './assets/semantic-ui/dist/semantic.min.css';
+import './index.css';
+
 ReactDOM.render(
   <Provider>
     <App />

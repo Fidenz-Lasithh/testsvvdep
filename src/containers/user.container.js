@@ -7,7 +7,7 @@ class UserContainer extends Container {
     user: null,
   };
 
-  async signIn() {
+  signIn = async () => {
     try {
       const res = await signIn();
       console.log(res);
