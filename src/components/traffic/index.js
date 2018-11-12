@@ -1,25 +1,17 @@
-import React, { Component } from 'react';
-import { Menu, Checkbox } from 'semantic-ui-react';
+import React from 'react';
+import { Subscribe } from 'unstated';
 
-class Traffic extends Component {
-  render() {
-    return (
-      <Menu vertical borderless size='huge'>
-        <Menu.Item>
-          <Checkbox toggle label='Enable' />
-        </Menu.Item>
-        <Menu.Item header>
-          Traffic
-        </Menu.Item>
-        <Menu.Item>Traffic counting equipment 1</Menu.Item>
-        <Menu.Item>Traffic counting equipment 2</Menu.Item>
-        <Menu.Item>Traffic counting equipment 3</Menu.Item>
-        <Menu.Item>Traffic counting equipment 4</Menu.Item>
-        <Menu.Item>Traffic counting equipment 5</Menu.Item>
-        <Menu.Item>Traffic counting equipment 6</Menu.Item>
-      </Menu>
-    );
-  }
-}
+import MapContainer from '../../containers/map.container';
+import Traffic from './traffic';
 
-export default Traffic;
+const TrafficComponent = () => {
+  return (
+    <Subscribe to={[MapContainer]}>
+      {map => (
+        <Traffic mapContainer={map} />
+      )}
+    </Subscribe>
+  );
+};
+
+export default TrafficComponent;
