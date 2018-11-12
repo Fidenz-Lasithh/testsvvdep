@@ -3,6 +3,10 @@ import { Menu, Checkbox } from 'semantic-ui-react';
 
 class Traffic extends Component {
 
+  async componentDidMount() {
+    await this.props.mapContainer.getData('traffic');
+  }
+
   handleClick = () => {
     this.props.mapContainer.setEnable('enableTraffic');
   };

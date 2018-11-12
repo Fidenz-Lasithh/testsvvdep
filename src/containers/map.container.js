@@ -11,22 +11,22 @@ class MapContainer extends Container {
     enableLaserData: false,
     enableSpeedSigns: false,
     enablePlowTrucks: false,
+    weather: null,
+    traffic: null,
   };
-
-  //TODO: the enable feature needs to be set for each nav tab and applied to the map object as a layer
 
   setEnable = (name) => {
     this.setState({[name]: !this.state[name]});
   };
 
-  getData = async () => {
+  getData = async (component) => {
     try {
       let err, data;
-      [err, data] = await getData();
+      [err, data] = await getData(component);
 
       if (err) console.log(err);
       console.log(data);
-      this.setState({data: data});
+      this.setState({[component]: data});
     } catch (err) {
       console.log(err);
     }

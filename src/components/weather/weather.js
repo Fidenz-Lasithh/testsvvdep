@@ -3,12 +3,22 @@ import { Menu, Checkbox } from 'semantic-ui-react';
 
 class Weather extends Component {
 
+  async componentDidMount() {
+    await this.props.mapContainer.getData('weather');
+  }
+
   handleClick = () => {
     this.props.mapContainer.setEnable('enableWeather');
   };
-  
+  // TODO: Write a component to render weather stations
   render() {
-    const { enableWeather } = this.props.mapContainer.state;
+    const { enableWeather, weather } = this.props.mapContainer.state;
+
+    // const renderWeatherStations = (weather) => {
+    //   return weather.map((weatherObj) => {
+    //     return <Menu.Item key={weatherObj.index}>Weather Station {weatherObj.index}</Menu.Item>
+    //   });
+    // };
 
     return (
       <Menu vertical borderless size='huge'>
