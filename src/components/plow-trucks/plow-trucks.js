@@ -4,16 +4,16 @@ import { Menu, Checkbox, Label } from 'semantic-ui-react';
 class PlowTrucks extends Component {
 
   handleClick = () => {
-    this.props.mapContainer.setEnable('enablePlowTrucks');
+    this.props.mapContainer.setToggle('togglePlowTrucks');
   };
 
   render() {
-    const { enablePlowTrucks } = this.props.mapContainer.state;
+    const { togglePlowTrucks } = this.props.mapContainer.state;
 
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={enablePlowTrucks === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={togglePlowTrucks === true} onClick={this.handleClick} />
         </Menu.Item>
         <Menu.Item header>
           Plow Trucks

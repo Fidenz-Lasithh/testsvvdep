@@ -8,11 +8,11 @@ class Weather extends Component {
   }
 
   handleClick = () => {
-    this.props.mapContainer.setEnable('enableWeather');
+    this.props.mapContainer.setToggle('toggleWeather');
   };
   // TODO: Write a component to render weather stations
   render() {
-    const { enableWeather, weather } = this.props.mapContainer.state;
+    const { toggleWeather, weather } = this.props.mapContainer.state;
 
     // const renderWeatherStations = (weather) => {
     //   return weather.map((weatherObj) => {
@@ -23,7 +23,7 @@ class Weather extends Component {
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={enableWeather === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={toggleWeather === true} onClick={this.handleClick} />
         </Menu.Item>
         <Menu.Item header>
           Weather

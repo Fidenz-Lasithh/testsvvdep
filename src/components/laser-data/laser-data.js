@@ -4,16 +4,16 @@ import { Menu, Checkbox } from 'semantic-ui-react';
 class LaserData extends Component {
 
   handleClick = () => {
-    this.props.mapContainer.setEnable('enableLaserData');
+    this.props.mapContainer.setToggle('toggleLaserData');
   };
 
   render() {
-    const { enableLaserData } = this.props.mapContainer.state;
+    const { toggleLaserData } = this.props.mapContainer.state;
 
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={enableLaserData === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={toggleLaserData === true} onClick={this.handleClick} />
         </Menu.Item>
         <Menu.Item header>
           Laser Data

@@ -8,16 +8,16 @@ class Traffic extends Component {
   }
 
   handleClick = () => {
-    this.props.mapContainer.setEnable('enableTraffic');
+    this.props.mapContainer.setToggle('toggleTraffic');
   };
   
   render() {
-    const { enableTraffic } = this.props.mapContainer.state;
+    const { toggleTraffic } = this.props.mapContainer.state;
 
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={enableTraffic === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={toggleTraffic === true} onClick={this.handleClick} />
         </Menu.Item>
         <Menu.Item header>
           Traffic

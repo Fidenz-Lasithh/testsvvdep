@@ -17,7 +17,7 @@ const getData = async (component) => {
   };
 
   if (err) return [err, res];
-  return [null, res];
+  return [null, res.data];
 };
 
 export { getData };

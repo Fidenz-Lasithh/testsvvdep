@@ -4,16 +4,16 @@ import { Menu, Checkbox } from 'semantic-ui-react';
 class Videos extends Component {
 
   handleClick = () => {
-    this.props.mapContainer.setEnable('enableSpeedSigns');
+    this.props.mapContainer.setToggle('toggleSpeedSigns');
   };
 
   render() {
-    const { enableSpeedSigns } = this.props.mapContainer.state;
+    const { toggleSpeedSigns } = this.props.mapContainer.state;
 
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={enableSpeedSigns === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={toggleSpeedSigns === true} onClick={this.handleClick} />
         </Menu.Item>
         <Menu.Item header>
           MP4
