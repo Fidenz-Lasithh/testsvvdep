@@ -1,14 +1,17 @@
-import React, { Component } from 'react';
-import { Segment } from 'semantic-ui-react';
+import React from 'react';
+import { Subscribe } from 'unstated';
 
-class Map extends Component {
-  render() {
-    return (
-      <Segment floated='right' size='large'>
-        <h1>Map</h1>
-      </Segment>
-    )
-  }
-}
+import MapContainer from '../../containers/map.container';
+import Map from './map';
 
-export default Map;
+const MapComponent = () => {
+  return (
+    <Subscribe to={[MapContainer]}>
+      {map => (
+        <Map mapContainer={map} />
+      )}
+    </Subscribe>
+  );
+};
+
+export default MapComponent;

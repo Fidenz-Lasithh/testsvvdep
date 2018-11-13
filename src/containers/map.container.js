@@ -12,9 +12,11 @@ class MapContainer extends Container {
     toggleLaserData: false,
     toggleSpeedSigns: false,
     togglePlowTrucks: false,
-    weather: null,
-    traffic: null,
+    data: null,
   };
+
+  // TODO: Have the fetched data stored in state with component name as key
+  // TODO: Logic to enable the map to read current fetched data and data held in the map object
 
   setToggle = (name) => {
     try {
@@ -63,7 +65,7 @@ class MapContainer extends Container {
       [err, data] = await getData(component);
       if (err) console.log(err);
 
-      this.setState({[component]: data});
+      this.setState({data: data});
     } catch (error) {
       console.log(error);
     }
