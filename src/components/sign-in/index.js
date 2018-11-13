@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 class SignIn extends Component {
   async componentDidMount() {
-    await this.props.userContainer.signIn();
+    // await this.props.userContainer.signIn();
   }
 
   render() {

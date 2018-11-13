@@ -1,23 +1,17 @@
-import React, { Component } from 'react';
-import { Menu, Checkbox } from 'semantic-ui-react';
+import React from 'react';
+import { Subscribe } from 'unstated';
 
-class Videos extends Component {
-  render() {
-    return (
-      <Menu vertical borderless size='huge'>
-        <Menu.Item>
-          <Checkbox toggle label='Enable' />
-        </Menu.Item>
-        <Menu.Item header>
-          MP4
-        </Menu.Item>
-        <Menu.Item>Video 1</Menu.Item>
-        <Menu.Item>Video 2</Menu.Item>
-        <Menu.Item>Video 3</Menu.Item>
-        <Menu.Item>Video 4</Menu.Item>
-      </Menu>
-    );
-  }
-}
+import MapContainer from '../../containers/map.container';
+import Videos from './videos';
 
-export default Videos;
+const VideosComponent = () => {
+  return (
+    <Subscribe to={[MapContainer]}>
+      {map => (
+        <Videos mapContainer={map} />
+      )}
+    </Subscribe>
+  );
+};
+
+export default VideosComponent;

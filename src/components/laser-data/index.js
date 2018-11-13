@@ -1,25 +1,17 @@
-import React, { Component } from 'react';
-import { Menu, Checkbox } from 'semantic-ui-react';
+import React from 'react';
+import { Subscribe } from 'unstated';
 
-class LaserData extends Component {
-  render() {
-    return (
-      <Menu vertical borderless size='huge'>
-        <Menu.Item>
-          <Checkbox toggle label='Enable' />
-        </Menu.Item>
-        <Menu.Item header>
-          Laser Data
-        </Menu.Item>
-        <Menu.Item>Traffic sign 1</Menu.Item>
-        <Menu.Item>Traffic sign 2</Menu.Item>
-        <Menu.Item>Traffic sign 3</Menu.Item>
-        <Menu.Item>Traffic sign 4</Menu.Item>
-        <Menu.Item>Traffic sign 5</Menu.Item>
-        <Menu.Item>Traffic sign 6</Menu.Item>
-      </Menu>
-    );
-  }
-}
+import MapContainer from '../../containers/map.container';
+import LaserData from './laser-data';
 
-export default LaserData;
+const LaserDataComponent = () => {
+  return (
+    <Subscribe to={[MapContainer]}>
+      {map => (
+        <LaserData mapContainer={map} />
+      )}
+    </Subscribe>
+  );
+};
+
+export default LaserDataComponent;
