@@ -17,48 +17,55 @@ class MapContainer extends Container {
   };
 
   setToggle = (name) => {
-    const stateName = name.slice(6).toLowerCase();
+    try {
+      const stateName = name.slice(6).toLowerCase();
 
-    this.setState(
-      {[name]: !this.state[name]}, 
-      () => {
-        this.state[name] ? 
-          this.addToMap(this.state[stateName]) :
-          this.removeFromMap(this.state[stateName]);
-      });
-  };
-
-  addToMap = (data) => {
-    const { map } = this.state;
-    let updatedMap;
-
-    if (!_.isEmpty(map)) {
-      updatedMap = _.concat(map, data);
-    } else {
-      updatedMap = data;
+      this.setState(
+        {[name]: !this.state[name]}, 
+        () => {
+          this.state[name] ? 
+            this.addToMap(this.state[stateName], stateName) :
+            this.removeFromMap(stateName);
+        });
+    } catch (error) {
+      console.log(error);
     }
-
-    this.setState({map: updatedMap}, () => {console.log(this.state.map)});
   };
   
-  removeFromMap = (data) => {
+  addToMap = (data, stateName) => {
     const { map } = this.state;
     let updatedMap;
     
-    updatedMap = _.filter(map, data);
-    this.setState({map: updatedMap}, () => {console.log(this.state.map)});
+    try {
+      updatedMap = _.assign(map, {[stateName]: data});
+      this.setState({map: updatedMap});
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  removeFromMap = (stateName) => {
+    const { map } = this.state;
+    let updatedMap;
+    
+    try {
+      updatedMap = _.omit(map, stateName);
+      this.setState({map: updatedMap});
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   getData = async (component) => {
-    try {
-      let err, data;
-      [err, data] = await getData(component);
+    let err, data;
 
+    try {
+      [err, data] = await getData(component);
       if (err) console.log(err);
-      console.log(data);
+
       this.setState({[component]: data});
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.log(error);
     }
   };
 

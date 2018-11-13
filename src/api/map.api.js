@@ -4,7 +4,7 @@ const getData = async (component) => {
   let err, res;
   switch (component) {
     case 'weather': {
-      [err, res] = await to(APIHandler.get('/api/v1/data/weather'));
+      [err, res] = await to(APIHandler.get('/api/v1/data/weather/bossovarri'));
       break;
     }
     case 'traffic': {
