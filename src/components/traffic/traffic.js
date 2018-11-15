@@ -1,33 +1,38 @@
 import React, { Component } from 'react';
 import { Menu, Checkbox } from 'semantic-ui-react';
 
+import TrafficEquipment from './trafficEquipment';
+
 class Traffic extends Component {
 
   async componentDidMount() {
     await this.props.mapContainer.getData('traffic');
   }
 
-  handleClick = () => {
+  handleToggle = () => {
     this.props.mapContainer.setToggle('toggleTraffic');
+  };
+
+  handleClick = (id) => {
+    this.props.mapContainer.setTarget(id);
   };
   
   render() {
-    const { toggleTraffic } = this.props.mapContainer.state;
+    const { toggleTraffic, data } = this.props.mapContainer.state;
+
+    const renderTrafficEquipment = () => {
+      return <TrafficEquipment equipment={data} onClick={this.handleClick} />
+    };
 
     return (
       <Menu vertical borderless size='huge'>
         <Menu.Item>
-          <Checkbox toggle label='Enable' checked={toggleTraffic === true} onClick={this.handleClick} />
+          <Checkbox toggle label='Enable' checked={toggleTraffic === true} onClick={this.handleToggle} />
         </Menu.Item>
         <Menu.Item header>
           Traffic
         </Menu.Item>
-        <Menu.Item>Traffic counting equipment 1</Menu.Item>
-        <Menu.Item>Traffic counting equipment 2</Menu.Item>
-        <Menu.Item>Traffic counting equipment 3</Menu.Item>
-        <Menu.Item>Traffic counting equipment 4</Menu.Item>
-        <Menu.Item>Traffic counting equipment 5</Menu.Item>
-        <Menu.Item>Traffic counting equipment 6</Menu.Item>
+        {renderTrafficEquipment()}
       </Menu>
     );
   }

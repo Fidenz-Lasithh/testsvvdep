@@ -5,14 +5,19 @@ import { getData } from '../api/map.api';
 
 class MapContainer extends Container {
   state = {
-    map: null,
+    data: null,
+    storedData: null,
+    mapData: null,
     toggleWeather: false,
     toggleTraffic: false,
     toggleFriction: false,
     toggleLaserData: false,
     toggleSpeedSigns: false,
     togglePlowTrucks: false,
-    data: null,
+    currentLocation: null,
+    zoom: null,
+    fetched: false,
+    screen: null,
   };
 
   // TODO: Have the fetched data stored in state with component name as key
@@ -20,42 +25,74 @@ class MapContainer extends Container {
 
   setToggle = (name) => {
     try {
-      const stateName = name.slice(6).toLowerCase();
+      const tabName = name.slice(6).toLowerCase();
 
       this.setState(
         {[name]: !this.state[name]}, 
         () => {
           this.state[name] ? 
-            this.addToMap(this.state[stateName], stateName) :
-            this.removeFromMap(stateName);
+            this.addToMap(this.state.data, tabName) :
+            this.removeFromMap(tabName);
         });
     } catch (error) {
       console.log(error);
     }
   };
   
-  addToMap = (data, stateName) => {
-    const { map } = this.state;
-    let updatedMap;
+  addToMap = (data, tabName) => {
+    const { storedData } = this.state;
+    let updatedData;
     
     try {
-      updatedMap = _.assign(map, {[stateName]: data});
-      this.setState({map: updatedMap});
+      updatedData = _.assign(storedData, {[tabName]: data});
+      this.setState({storedData: updatedData});
     } catch (error) {
       console.log(error);
     }
   };
   
-  removeFromMap = (stateName) => {
-    const { map } = this.state;
-    let updatedMap;
+  removeFromMap = (tabName) => {
+    const { storedData } = this.state;
+    let updatedData;
     
     try {
-      updatedMap = _.omit(map, stateName);
-      this.setState({map: updatedMap});
+      updatedData = _.omit(storedData, tabName);
+      this.setState({storedData: updatedData});
     } catch (error) {
       console.log(error);
     }
+  };
+
+  readMapData = async (component) => {
+    const { storedData, data } = this.state;
+    let mapData;
+    
+    // mapData = _.assignIn(storedData, )
+    // if (!_.isEmpty(storedData)) {
+    //   _.forIn(storedData, (d) => {
+    //     mapData = _.concat(mapData, d);
+    //   })
+    // }
+
+    // mapData = _.assign(mapData, data);
+
+    // mapData = _.concat(mapData, data);
+    // console.log(mapData);
+    this.setState({mapData: data, fetched: true, screen: component});
+  };
+
+  setTarget = (id) => {
+    const { mapData } = this.state;
+    let target, location;
+
+    if (_.isArray(mapData)) {
+      target = _.find(mapData, id);
+    } else {
+      target = mapData;
+    }
+
+    location = target.geometry.coordinates;
+    this.setState({currentLocation: location, zoom: [10]});
   };
 
   getData = async (component) => {
@@ -65,7 +102,7 @@ class MapContainer extends Container {
       [err, data] = await getData(component);
       if (err) console.log(err);
 
-      this.setState({data: data});
+      this.setState({data: data}, () => this.readMapData(component));
     } catch (error) {
       console.log(error);
     }
