@@ -24,7 +24,7 @@ class Nav extends Component {
 
     return (
       <Menu>
-        <Menu.Item name='/' active={activeItem === '/'} onClick={this.handleItemClick}>
+        <Menu.Item name='/videos' active={activeItem === '/videos'} onClick={this.handleItemClick}>
           MP4
         </Menu.Item>
 
@@ -40,7 +40,7 @@ class Nav extends Component {
           Friction
         </Menu.Item>
 
-        <Menu.Item name='/weather' active={activeItem === '/weather'} onClick={this.handleItemClick}>
+        <Menu.Item name='/' active={activeItem === '/'} onClick={this.handleItemClick}>
           Weather
         </Menu.Item>
 

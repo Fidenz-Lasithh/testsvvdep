@@ -1,9 +1,9 @@
 import React from 'react';
 import { Menu } from 'semantic-ui-react';
 
-export default ({equipment, onClick}) => {
+export default (props) => {
   return (
-    <Menu.Item onClick={() => onClick(equipment.id)}>
+    <Menu.Item onClick={() => props.onClick(props.station._id)}>
       Traffic counting equipment
     </Menu.Item>
   );

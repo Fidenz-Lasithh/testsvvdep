@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Segment } from 'semantic-ui-react';
+import { Segment, Dimmer, Loader } from 'semantic-ui-react';
 import ReactMapboxGl, { Popup, Feature, Layer } from "react-mapbox-gl";
 
 const MapComponent = ReactMapboxGl({accessToken: 'pk.eyJ1Ijoic3RlZmFudmFuIiwiYSI6ImNqb2ZlOXNvMzAzaWIzd3J4dmhpOWlkNDUifQ.MkqUKuVW0avbeq5aAKfrcg'});
@@ -13,13 +13,12 @@ class Map extends Component {
       popup: false
     }
   }
-  // TODO: change state of station when different screens are clicked
+
   handleClick = async (station) => {
     let stationData;
 
     stationData = await this.props.mapContainer.getWeatherStationData(station);
     this.setState({station: stationData, popup: true});
-    // this.setState({popup: !this.state.popup, point: location});
   }
 
   togglePopup = () => {
@@ -27,24 +26,27 @@ class Map extends Component {
   }
 
   // TODO: change mouse pointer on hover
-  // TODO: close popup
 
   render() {
     const { mapData, currentLocation, zoom, fetched, screen } = this.props.mapContainer.state;
     const { station, popup } = this.state;
 
     const renderFeatures = () => {
-      return mapData.features.map((data) => {
-        return (
-          <Feature
-            // onMouseEnter={this.onToggleHover('pointer')}
-            // onMouseLeave={this.onToggleHover('')}
-            key={data._id}
-            onClick={() => this.handleClick(data._id)}
-            coordinates={data.geometry.coordinates}
-          />
-        )
-      })
+      try {
+        return mapData.features.map((data) => {
+          return (
+            <Feature
+              // onMouseEnter={this.onToggleHover('pointer')}
+              // onMouseLeave={this.onToggleHover('')}
+              key={data._id}
+              onClick={() => this.handleClick(data._id)}
+              coordinates={data.geometry.coordinates}
+            />
+          )
+        })
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     const popupText = () => {
@@ -111,7 +113,9 @@ class Map extends Component {
             )}
           </MapComponent>
         ) : (
-          null
+          <Dimmer active inverted>
+            <Loader size='big'>Loading...</Loader>
+          </Dimmer>
         )}
       </Segment>
     )

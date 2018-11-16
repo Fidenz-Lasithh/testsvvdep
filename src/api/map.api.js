@@ -8,7 +8,7 @@ const getData = async (component) => {
       break;
     }
     case 'traffic': {
-      [err, res] = await to(APIHandler.get('/api/v1/data/traffic'));
+      [err, res] = await to(APIHandler.get('/api/v1/data/stations/traffic'));
       break;
     }
     default: {
@@ -28,5 +28,14 @@ const getWeatherStationData = async (stationName) => {
   if (err) return [err, res];
   return [null, res.data];
 }
+
+// const getTrafficStationData = async (stationName) => {
+//   let err, res;
+
+//   [err, res] = await to(APIHandler.get(`/api/v1/data/weather/${stationName}`));
+
+//   if (err) return [err, res];
+//   return [null, res.data];
+// }
 
 export { getData, getWeatherStationData };

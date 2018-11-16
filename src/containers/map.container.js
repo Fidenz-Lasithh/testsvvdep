@@ -61,10 +61,9 @@ class MapContainer extends Container {
     }
   };
 
-  // Function to combine data from current screen and from other enabled screens
+  // TODO: Function to combine data from current screen and from other enabled screens
   readMapData = async (component) => {
-    const { storedData, data } = this.state;
-    let mapData;
+    const { data } = this.state;
     
     // mapData = _.assignIn(storedData, )
     // if (!_.isEmpty(storedData)) {
@@ -101,6 +100,8 @@ class MapContainer extends Container {
     let err, data;
 
     try {
+      this.setState({fetched: false});
+
       [err, data] = await getData(component);
       if (err) console.log(err);
 
