@@ -18,10 +18,12 @@ class Weather extends Component {
   };
 
   render() {
-    const { toggleWeather, data } = this.props.mapContainer.state;
-
+    const { toggleWeather, data, fetched } = this.props.mapContainer.state;
+    
     const renderWeatherStations = () => {
-      return <WeatherStation station={data} onClick={this.handleClick} />
+      return data.features.map((data) => {
+        return <WeatherStation key={data._id} station={data} onClick={this.handleClick} />
+      });
     };
 
     return (
@@ -32,7 +34,11 @@ class Weather extends Component {
         <Menu.Item header>
           Weather
         </Menu.Item>
-        {renderWeatherStations()}
+        {fetched ? (
+          renderWeatherStations()
+        ) : (
+          null
+        )}
       </Menu>
     );
   }

@@ -9,43 +9,44 @@ class Map extends Component {
     super();
 
     this.state = {
-      point: null,
-      station: null
+      station: null,
+      popup: false
     }
   }
   // TODO: change state of station when different screens are clicked
-  handleClick = (station) => {
-    this.setState({station: station});
-    // let point;
-    // if (e.lngLat) {
-    //   point = [e.lngLat.lng, e.lngLat.lat];
-    // }
-    // console.log(point);
+  handleClick = async (station) => {
+    let stationData;
+
+    stationData = await this.props.mapContainer.getWeatherStationData(station);
+    this.setState({station: stationData, popup: true});
     // this.setState({popup: !this.state.popup, point: location});
   }
 
+  togglePopup = () => {
+    this.setState({popup: !this.state.popup});
+  }
+
   // TODO: change mouse pointer on hover
-  // onToggleHover = ({map}, cursor) => {
-  //   map.getCanvas().style.cursor = cursor;
-  // }
+  // TODO: close popup
 
   render() {
     const { mapData, currentLocation, zoom, fetched, screen } = this.props.mapContainer.state;
-    const { station } = this.state;
+    const { station, popup } = this.state;
 
     const renderFeatures = () => {
-      console.log(mapData);
-      // TODO: logic to render a collection of features
-      return (
-        <Feature
-          // onMouseEnter={this.onToggleHover('pointer')}
-          // onMouseLeave={this.onToggleHover('')}
-          onClick={() => this.handleClick(mapData)}
-          coordinates={mapData.geometry.coordinates}
-        />
-      );
+      return mapData.features.map((data) => {
+        return (
+          <Feature
+            // onMouseEnter={this.onToggleHover('pointer')}
+            // onMouseLeave={this.onToggleHover('')}
+            key={data._id}
+            onClick={() => this.handleClick(data._id)}
+            coordinates={data.geometry.coordinates}
+          />
+        )
+      })
     };
-    // TODO: close popup
+
     const popupText = () => {
       if (screen === 'traffic') {
         return (
@@ -97,12 +98,13 @@ class Map extends Component {
             >
               {renderFeatures()}
             </Layer>
-            {station && (
+            {popup && (
               <Popup 
                 coordinates={station.geometry.coordinates}
                 offset={{
                   'bottom-left': [12, -38],  'bottom': [0, -10], 'bottom-right': [-12, -38]
                 }}
+                onClick={this.togglePopup}
               >
                 {popupText()}
               </Popup>

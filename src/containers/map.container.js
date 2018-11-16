@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Container } from 'unstated';
 
-import { getData } from '../api/map.api';
+import { getData, getWeatherStationData } from '../api/map.api';
 
 class MapContainer extends Container {
   state = {
@@ -20,8 +20,6 @@ class MapContainer extends Container {
     screen: null,
   };
 
-  // TODO: Have the fetched data stored in state with component name as key
-  // TODO: Logic to enable the map to read current fetched data and data held in the map object
 
   setToggle = (name) => {
     try {
@@ -63,6 +61,7 @@ class MapContainer extends Container {
     }
   };
 
+  // Function to combine data from current screen and from other enabled screens
   readMapData = async (component) => {
     const { storedData, data } = this.state;
     let mapData;
@@ -85,14 +84,17 @@ class MapContainer extends Container {
     const { mapData } = this.state;
     let target, location;
 
-    if (_.isArray(mapData)) {
-      target = _.find(mapData, id);
-    } else {
-      target = mapData;
+    try {
+      target = _.find(mapData.features, {'_id': id});
+      // if (_.isArray(mapData)) {
+      // } else {
+      //   target = mapData;
+      // }
+      location = target.geometry.coordinates;
+      this.setState({currentLocation: location, zoom: [14]});
+    } catch (error) {
+      console.log(error);
     }
-
-    location = target.geometry.coordinates;
-    this.setState({currentLocation: location, zoom: [10]});
   };
 
   getData = async (component) => {
@@ -108,6 +110,17 @@ class MapContainer extends Container {
     }
   };
 
+  getWeatherStationData = async (stationName) => {
+    let err, data;
+
+    try {
+      [err, data] = await getWeatherStationData(stationName);
+      if (err) console.log(err);
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 }
 
 export default MapContainer;
