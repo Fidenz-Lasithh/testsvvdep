@@ -4,7 +4,7 @@ import { Menu } from 'semantic-ui-react';
 export default (props) => {
   return (
     <Menu.Item onClick={() => props.onClick(props.station._id)}>
-      Traffic counting equipment
+      Traffic counting equipment {props.station._id}
     </Menu.Item>
   );
 };

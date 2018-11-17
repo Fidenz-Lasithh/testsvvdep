@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Container } from 'unstated';
 
-import { getData, getWeatherStationData } from '../api/map.api';
+import { getData, getWeatherStationData, getTrafficStationData } from '../api/map.api';
 
 class MapContainer extends Container {
   state = {
@@ -18,8 +18,30 @@ class MapContainer extends Container {
     zoom: null,
     fetched: false,
     screen: null,
+    modal: false,
+    modalParams: {
+      stationName: null,
+      param: null,
+      dateFrom: null,
+      dateTo: null
+    },
+    stationData: null,
   };
 
+  toggleModal = () => {
+    this.setState({stationData: null, modal: !this.state.modal});
+  };
+
+  setModalParams = (stationName, param, dateFrom, dateTo) => {
+    this.setState({
+      modalParams: {
+        stationName,
+        param,
+        dateFrom,
+        dateTo
+      }
+    }, () => this.getTrafficStationData());
+  }
 
   setToggle = (name) => {
     try {
@@ -118,6 +140,18 @@ class MapContainer extends Container {
       [err, data] = await getWeatherStationData(stationName);
       if (err) console.log(err);
       return data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  getTrafficStationData = async () => {
+    const { stationName, dateFrom, dateTo, param } = this.state.modalParams;
+    let err, data;
+    try {
+      [err, data] = await getTrafficStationData(stationName, dateFrom, dateTo, param);
+      if (err) console.log(err);
+      else this.setState({stationData: data});
     } catch (error) {
       console.log(error);
     }

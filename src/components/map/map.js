@@ -1,6 +1,10 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Segment, Dimmer, Loader } from 'semantic-ui-react';
-import ReactMapboxGl, { Popup, Feature, Layer } from "react-mapbox-gl";
+import ReactMapboxGl, { Feature, Layer } from "react-mapbox-gl";
+import WeatherPopup from '../popup/weather-popup';
+import TrafficPopup from '../popup/modal';
+import trafficMarker from '../../assets/markers/traffic_counting.svg';
+import weatherMarker from '../../assets/markers/weather_data.svg';
 
 const MapComponent = ReactMapboxGl({accessToken: 'pk.eyJ1Ijoic3RlZmFudmFuIiwiYSI6ImNqb2ZlOXNvMzAzaWIzd3J4dmhpOWlkNDUifQ.MkqUKuVW0avbeq5aAKfrcg'});
 
@@ -10,15 +14,21 @@ class Map extends Component {
 
     this.state = {
       station: null,
+      stationName: null,
       popup: false
     }
   }
 
-  handleClick = async (station) => {
-    let stationData;
+  handleClick = async (stationName, screen) => {
+    let res;
 
-    stationData = await this.props.mapContainer.getWeatherStationData(station);
-    this.setState({station: stationData, popup: true});
+    if (screen === 'traffic') {
+      this.setState({stationName});
+      this.props.mapContainer.toggleModal();
+    } else if (screen === 'weather') {
+      res = await this.props.mapContainer.getWeatherStationData(stationName);
+      this.setState({station: res, popup: true});
+    }
   }
 
   togglePopup = () => {
@@ -28,8 +38,19 @@ class Map extends Component {
   // TODO: change mouse pointer on hover
 
   render() {
-    const { mapData, currentLocation, zoom, fetched, screen } = this.props.mapContainer.state;
-    const { station, popup } = this.state;
+    const { mapData, currentLocation, zoom, fetched, screen, modal } = this.props.mapContainer.state;
+    const { station, popup, stationName } = this.state;
+
+    const image = new Image(50, 50);
+    if (screen === 'traffic') {
+      image.src = trafficMarker;
+    } else if (screen === 'weather') {
+      image.src = weatherMarker;
+    }
+    const images = {
+      weather: ["weather", image],
+      traffic: ["traffic", image]
+    };
 
     const renderFeatures = () => {
       try {
@@ -39,7 +60,7 @@ class Map extends Component {
               // onMouseEnter={this.onToggleHover('pointer')}
               // onMouseLeave={this.onToggleHover('')}
               key={data._id}
-              onClick={() => this.handleClick(data._id)}
+              onClick={() => this.handleClick(data._id, screen)}
               coordinates={data.geometry.coordinates}
             />
           )
@@ -49,41 +70,20 @@ class Map extends Component {
       }
     };
 
-    const popupText = () => {
-      if (screen === 'traffic') {
-        return (
-          <Fragment>
-            <p>Passenger car count:</p>
-            <p>Bus/truck count:</p>
-            <p>Vehicle speed: {station.properties['speed_(km/h)']} Kmph</p>
-            <p>Other data points</p>
-          </Fragment>
-        );
-      } else if (screen === 'weather') {
-        return (
-          <Fragment>
-            <p>Air temperature (C): {station.properties['Lufttemperatur (§C)']}</p>
-            <p>Quality: {station.properties['Kvalitet']}</p>
-            <p>Relative humidity (%): {station.properties['Relativ luftfuktighet (%)']}</p>
-            <p>Quality: {station.properties['Kvalitet']}</p>
-            <p>Roadway temperature (C): {station.properties['Vegbanetemperatur (§C)']}</p>
-            <p>Surface conditions: {station.properties['Friksjon i vegbane']}</p>
-            <p>Nedb?rsintensitet (mm/t): {station.properties['Nedb?rsintensitet (mm/t)']}</p>
-            <p>Precipitation type: {station.properties['Nedb?rstype']}</p>
-            <p>Visibility of precipitation (m): {station.properties['Sikt i nedb?r (m)']}</p>
-            <p>Wind speed (m/s): {station.properties['Vindhastighet (m/s)']}</p>
-            <p>Wind direction (0 - 360): {station.properties['Vindretning (0 - 360ø) (§)']}</p>
-            <p>Windshield (m/s): {station.properties['Vindkast (m/s)']}</p>
-            <p>Amount of water in roadway (mm): {station.properties['Mengde vann i vegbane (mm)']}</p>
-            <p>Amount of ice in roadway (mm): {station.properties['Mengde is i vegbane (mm)']}</p>
-            <p>Amount of snow in roadway (mm): {station.properties['Mengde sn? i vegbane (mm)']}</p>
-          </Fragment>
-        )
+    const renderPopup = () => {
+      if (screen === 'weather') {
+        return <WeatherPopup station={station} onClick={this.togglePopup} />
       }
     };
+  
+    const renderModal = () => {
+      if (screen === 'traffic') {
+        return <TrafficPopup stationName={stationName} />
+      }
+    }
     
     return (
-      <Segment floated='right' size='large' id='map-segment'>
+      <Segment floated='right' size='large'>
         {fetched ? (
           <MapComponent
             style="mapbox://styles/mapbox/streets-v8"
@@ -95,21 +95,17 @@ class Map extends Component {
             }}
           >
             <Layer
-              type="circle"
-              paint={{'circle-color': 'red'}}
+              type="symbol"
+              images={images[screen]}
+              layout={{ "icon-image": `${screen}`, "icon-allow-overlap": true }}
             >
               {renderFeatures()}
             </Layer>
             {popup && (
-              <Popup 
-                coordinates={station.geometry.coordinates}
-                offset={{
-                  'bottom-left': [12, -38],  'bottom': [0, -10], 'bottom-right': [-12, -38]
-                }}
-                onClick={this.togglePopup}
-              >
-                {popupText()}
-              </Popup>
+              renderPopup()
+            )}
+            {modal && (
+              renderModal()
             )}
           </MapComponent>
         ) : (
