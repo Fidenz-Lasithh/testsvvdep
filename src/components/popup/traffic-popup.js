@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Modal, Form, Grid, Button, Header, Select, Divider } from 'semantic-ui-react';
+import { Modal, Form, Grid, Button, Header, Select, Divider, Table } from 'semantic-ui-react';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
+import './index.css';
 
 class trafficModal extends Component {
   constructor(props) {
@@ -33,7 +34,7 @@ class trafficModal extends Component {
   }
   // Date range 2017/01/01 to 2018/08/31
   render() {
-    const { stationData } = this.props.mapContainer.state;
+    const { stationData, modalLoading } = this.props.mapContainer.state;
     const { dateFrom, dateTo } = this.state;
     
     const dropdownOptions = [
@@ -86,16 +87,59 @@ class trafficModal extends Component {
             </Grid.Column>
           </Grid>
           <Divider />
-          <Button type="submit" primary>View</Button>
+          <Button type="submit" disabled={modalLoading} loading={modalLoading} primary>View</Button>
         </Form>
       );
     };
 
     const renderData = () => {
+      let tableHeaders = [];
+      console.log(stationData);
+
+      for (let n = 1; n < 25; n++) {
+        tableHeaders.push(<Table.HeaderCell key={n}>{n}</Table.HeaderCell>);
+      }
+
+      const renderDataCell = () => {
+        return stationData.map((data) => {
+          return (
+            <Table.Row>
+              <Table.Cell>{data.id}</Table.Cell>
+            </Table.Row>
+          );
+        });
+      }; 
+      
+      const setColour = (data) => {
+        if (data <= 100 && data >= 70) {
+          return 'green';
+        }
+        else if (data <= 69 && data >= 40) {
+          return 'yellow';
+        }
+        else if (data <= 39 && data >= 10) {
+          return 'orange';
+        }
+        else if (data <= 9 && data >= -20) {
+          return 'red';
+        }
+      }
+
       return (
-        null
+        <Table striped>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Date</Table.HeaderCell>
+              {tableHeaders}
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {/* {renderDataCell} */}
+          </Table.Body>
+        </Table>
       );
-    }
+    };
+
     
     return (
       <Modal 

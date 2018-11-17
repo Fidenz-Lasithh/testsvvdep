@@ -19,6 +19,7 @@ class MapContainer extends Container {
     fetched: false,
     screen: null,
     modal: false,
+    modalLoading: false,
     modalParams: {
       stationName: null,
       param: null,
@@ -149,9 +150,10 @@ class MapContainer extends Container {
     const { stationName, dateFrom, dateTo, param } = this.state.modalParams;
     let err, data;
     try {
+      this.setState({modalLoading: true});
       [err, data] = await getTrafficStationData(stationName, dateFrom, dateTo, param);
       if (err) console.log(err);
-      else this.setState({stationData: data});
+      else this.setState({stationData: data, modalLoading: false});
     } catch (error) {
       console.log(error);
     }

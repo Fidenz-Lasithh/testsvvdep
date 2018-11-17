@@ -57,11 +57,11 @@ class Map extends Component {
         return mapData.features.map((data) => {
           return (
             <Feature
-              // onMouseEnter={this.onToggleHover('pointer')}
-              // onMouseLeave={this.onToggleHover('')}
-              key={data._id}
-              onClick={() => this.handleClick(data._id, screen)}
-              coordinates={data.geometry.coordinates}
+            // onMouseEnter={this.onToggleHover('pointer')}
+            // onMouseLeave={this.onToggleHover('')}
+            key={screen === 'weather' ? data._id : data.properties.nr}
+            onClick={() => this.handleClick(screen === 'weather' ? data._id : data.properties.nr, screen)}
+            coordinates={data.geometry.coordinates}
             />
           )
         })

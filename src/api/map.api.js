@@ -32,7 +32,6 @@ const getWeatherStationData = async (stationName) => {
 const getTrafficStationData = async (stationName, dateFrom, dateTo, parameter) => {
   let err, res;
 
-  console.log(stationName, dateFrom, dateTo, parameter);
   [err, res] = await to(APIHandler.get(`/api/v1/data/traffic/${stationName}?dateFrom=${dateFrom}&dateTo=${dateTo}&param=${parameter}`));
   
   if (err) return [err, res];
