@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.css';
-import trafficData from './data.json';
+
 
 class trafficModal extends Component {
   constructor(props) {
@@ -14,16 +14,19 @@ class trafficModal extends Component {
       param: '',
       dateFrom: '',
       dateTo: '',
-      hasErrors: false,
+      errors: {
+        hasErrors: false,
+        message: null
+      }
     };
   }
 
   handleChange = (e, { value }) => {
-    this.setState({param: value, hasErrors: false});
+    this.setState({param: value, errors: {hasErrors: false, message: null}});
   }
 
   handleDateChange = (name, date) => {
-    this.setState({[name]: date, hasErrors: false});
+    this.setState({[name]: date, errors: {hasErrors: false, message: null}});
   };
 
   handleSubmit = () => {
@@ -35,14 +38,14 @@ class trafficModal extends Component {
     if (param && dateFrom && dateTo) {
       this.props.mapContainer.setModalParams(stationName, param, from, to);
     } else {
-      this.setState({hasErrors: true});
+      this.setState({errors: {hasErrors: true, message: "All fields need to be filled to view data"}});
     }
-  }
+  };
 
   // Date range 2017/01/01 to 2018/08/31
   render() {
-    const { stationData, modalLoading } = this.props.mapContainer.state;
-    const { dateFrom, dateTo, hasErrors } = this.state;
+    const { stationData, modalLoading, modalErrors } = this.props.mapContainer.state;
+    const { dateFrom, dateTo, errors } = this.state;
     
     const dropdownOptions = [
       {
@@ -55,12 +58,12 @@ class trafficModal extends Component {
     // Render form to select data to view
     const renderForm = () => {
       return (
-        <Form onSubmit={this.handleSubmit} error={hasErrors}>
+        <Form onSubmit={this.handleSubmit} error={errors.hasErrors || modalErrors.hasErrors}>
           <Header>Traffic data</Header>
           <Divider />
           <Message 
             error
-            content='All fields need to be filled to view data'
+            content={errors.message || modalErrors.message}
           />
           <Grid columns={3}>
             <Grid.Column>
@@ -80,7 +83,8 @@ class trafficModal extends Component {
                   selected={dateFrom === "" ? null : dateFrom}
                   onChange={(e) => this.handleDateChange('dateFrom', e)}
                   placeholderText={moment().subtract(28, "days").format('DD/MM/YYYY')}
-                  maxDate={moment()}
+                  isClearable={true}
+                  maxDate={dateTo ? dateTo : moment()}
                 />
               </Form.Field>
             </Grid.Column>
@@ -93,6 +97,8 @@ class trafficModal extends Component {
                   onChange={(e) => this.handleDateChange('dateTo', e)}
                   placeholderText={moment().format('DD/MM/YYYY')}
                   todayButton={"Today"}
+                  isClearable={true}
+                  minDate={dateFrom ? dateFrom : null}
                   maxDate={moment()}
                 />
               </Form.Field>
@@ -106,16 +112,16 @@ class trafficModal extends Component {
 
     // Function to assign colour code to heatmap
     const setColour = (data) => {
-      if (data <= 100 && data >= 70) {
+      if (data < 121 && data > 69) {
         return 'green';
       }
-      else if (data <= 69 && data >= 40) {
+      else if (data < 70 && data > 39) {
         return 'yellow';
       }
-      else if (data <= 39 && data >= 10) {
+      else if (data < 40 && data > 9) {
         return 'orange';
       }
-      else if (data <= 9 && data >= -20) {
+      else if (data < 10 && data > -71) {
         return 'red';
       }
     }
@@ -123,7 +129,6 @@ class trafficModal extends Component {
     // Render data set once it has been fetched 
     const renderData = () => {
       let tableHeaders = [];
-      // console.log(trafficData);
 
       for (let n = 1; n < 25; n++) {
         tableHeaders.push(
@@ -133,17 +138,17 @@ class trafficModal extends Component {
         );
       }
 
-      const renderDataCell = trafficData.map((data) => {
+      const renderDataCell = stationData.map((data) => {
         let hourDataCell = [];
-        for (let n = 1; n < 25; n++) {
+        for (let n = 0; n < 24; n++) {
           hourDataCell.push(
             <Table.Cell key={n} className={setColour(data.hours[n < 10 ? `0${n}` : n])}>
               {data.hours[n < 10 ? `0${n}` : n]}
             </Table.Cell>
         )}
         return (
-          <Table.Row key={data.id}>
-            <Table.Cell>{data.id}</Table.Cell>
+          <Table.Row key={data.date}>
+            <Table.Cell>{data.date}</Table.Cell>
             {hourDataCell}
           </Table.Row>
         );

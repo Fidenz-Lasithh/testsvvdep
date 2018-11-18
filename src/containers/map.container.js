@@ -20,6 +20,10 @@ class MapContainer extends Container {
     screen: null,
     modal: false,
     modalLoading: false,
+    modalErrors: {
+      hasErrors: false,
+      message: null
+    },
     modalParams: {
       stationName: null,
       param: null,
@@ -30,7 +34,14 @@ class MapContainer extends Container {
   };
 
   toggleModal = () => {
-    this.setState({stationData: null, modal: !this.state.modal});
+    this.setState({
+      stationData: null, 
+      modal: !this.state.modal, 
+      modalErrors: { 
+        hasErrors: false, 
+        message: null 
+      }
+    });
   };
 
   setModalParams = (stationName, param, dateFrom, dateTo) => {
@@ -134,6 +145,28 @@ class MapContainer extends Container {
     }
   };
 
+  mapData = (data) => {
+    const mappedData = [];
+    
+    Object.keys(data).forEach((key) => {
+      const [date, hour] = key.split(' ');
+      const indexOfCurrentData = _.findIndex(mappedData, { date });
+      const roundedNum = Number.parseFloat(data[key]).toFixed(2);
+      if (indexOfCurrentData === -1) {
+        mappedData.push({
+          date,
+          hours: {
+            [hour]: roundedNum
+          }
+        });
+      } else {
+        mappedData[indexOfCurrentData].hours[hour] = roundedNum;
+      }
+    });
+    
+    return mappedData;
+  };
+
   getWeatherStationData = async (stationName) => {
     let err, data;
 
@@ -150,10 +183,23 @@ class MapContainer extends Container {
     const { stationName, dateFrom, dateTo, param } = this.state.modalParams;
     let err, data;
     try {
-      this.setState({modalLoading: true});
+      this.setState({modalLoading: true, modalErrors: { hasErrors: false, message: null }});
       [err, data] = await getTrafficStationData(stationName, dateFrom, dateTo, param);
       if (err) console.log(err);
-      else this.setState({stationData: data, modalLoading: false});
+      else {
+        const mappedData = this.mapData(data);
+        if (_.isEmpty(mappedData)) {
+          this.setState({
+            modalLoading: false, 
+            modalErrors: {
+              hasErrors: true, 
+              message: "Please select a different date range"
+            }
+          })
+        } else {
+          this.setState({stationData: mappedData,  modalLoading: false});
+        }
+      };
     } catch (error) {
       console.log(error);
     }

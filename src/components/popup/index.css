@@ -13,3 +13,8 @@
 .yellow {
   background-color: #ffff00;
 }
+
+.ui.fullscreen.modal > .content {
+  overflow: auto;
+  padding-top: 4rem;
+}
