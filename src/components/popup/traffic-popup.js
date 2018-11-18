@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Modal, Form, Grid, Button, Header, Select, Divider, Table } from 'semantic-ui-react';
+import { Modal, Form, Grid, Button, Header, Select, Divider, Table, Message } from 'semantic-ui-react';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.css';
+import trafficData from './data.json';
 
 class trafficModal extends Component {
   constructor(props) {
@@ -13,15 +14,16 @@ class trafficModal extends Component {
       param: '',
       dateFrom: '',
       dateTo: '',
+      hasErrors: false,
     };
   }
 
   handleChange = (e, { value }) => {
-    this.setState({ param: value });
+    this.setState({param: value, hasErrors: false});
   }
 
   handleDateChange = (name, date) => {
-    this.setState({[name]: date});
+    this.setState({[name]: date, hasErrors: false});
   };
 
   handleSubmit = () => {
@@ -30,12 +32,17 @@ class trafficModal extends Component {
     const from = moment(dateFrom).format('YYYY/MM/DD');
     const to = moment(dateTo).format('YYYY/MM/DD');
 
-    this.props.mapContainer.setModalParams(stationName, param, from, to);
+    if (param && dateFrom && dateTo) {
+      this.props.mapContainer.setModalParams(stationName, param, from, to);
+    } else {
+      this.setState({hasErrors: true});
+    }
   }
+
   // Date range 2017/01/01 to 2018/08/31
   render() {
     const { stationData, modalLoading } = this.props.mapContainer.state;
-    const { dateFrom, dateTo } = this.state;
+    const { dateFrom, dateTo, hasErrors } = this.state;
     
     const dropdownOptions = [
       {
@@ -45,11 +52,16 @@ class trafficModal extends Component {
       }
     ]
 
+    // Render form to select data to view
     const renderForm = () => {
       return (
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={hasErrors}>
           <Header>Traffic data</Header>
           <Divider />
+          <Message 
+            error
+            content='All fields need to be filled to view data'
+          />
           <Grid columns={3}>
             <Grid.Column>
               <Form.Field 
@@ -69,7 +81,7 @@ class trafficModal extends Component {
                   onChange={(e) => this.handleDateChange('dateFrom', e)}
                   placeholderText={moment().subtract(28, "days").format('DD/MM/YYYY')}
                   maxDate={moment()}
-                  />
+                />
               </Form.Field>
             </Grid.Column>
             <Grid.Column>
@@ -92,39 +104,51 @@ class trafficModal extends Component {
       );
     };
 
+    // Function to assign colour code to heatmap
+    const setColour = (data) => {
+      if (data <= 100 && data >= 70) {
+        return 'green';
+      }
+      else if (data <= 69 && data >= 40) {
+        return 'yellow';
+      }
+      else if (data <= 39 && data >= 10) {
+        return 'orange';
+      }
+      else if (data <= 9 && data >= -20) {
+        return 'red';
+      }
+    }
+
+    // Render data set once it has been fetched 
     const renderData = () => {
       let tableHeaders = [];
-      console.log(stationData);
+      // console.log(trafficData);
 
       for (let n = 1; n < 25; n++) {
-        tableHeaders.push(<Table.HeaderCell key={n}>{n}</Table.HeaderCell>);
+        tableHeaders.push(
+          <Table.HeaderCell key={n}>
+            {n < 10 ? `0${n}` : n}
+          </Table.HeaderCell>
+        );
       }
 
-      const renderDataCell = () => {
-        return stationData.map((data) => {
-          return (
-            <Table.Row>
-              <Table.Cell>{data.id}</Table.Cell>
-            </Table.Row>
-          );
-        });
-      }; 
+      const renderDataCell = trafficData.map((data) => {
+        let hourDataCell = [];
+        for (let n = 1; n < 25; n++) {
+          hourDataCell.push(
+            <Table.Cell key={n} className={setColour(data.hours[n < 10 ? `0${n}` : n])}>
+              {data.hours[n < 10 ? `0${n}` : n]}
+            </Table.Cell>
+        )}
+        return (
+          <Table.Row key={data.id}>
+            <Table.Cell>{data.id}</Table.Cell>
+            {hourDataCell}
+          </Table.Row>
+        );
+      }); 
       
-      const setColour = (data) => {
-        if (data <= 100 && data >= 70) {
-          return 'green';
-        }
-        else if (data <= 69 && data >= 40) {
-          return 'yellow';
-        }
-        else if (data <= 39 && data >= 10) {
-          return 'orange';
-        }
-        else if (data <= 9 && data >= -20) {
-          return 'red';
-        }
-      }
-
       return (
         <Table striped>
           <Table.Header>
@@ -134,7 +158,7 @@ class trafficModal extends Component {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {/* {renderDataCell} */}
+            {renderDataCell}
           </Table.Body>
         </Table>
       );
@@ -146,6 +170,7 @@ class trafficModal extends Component {
         open={this.props.mapContainer.state.modal} 
         closeIcon={true} 
         onClose={() => this.props.mapContainer.toggleModal()}
+        size={stationData ? "fullscreen" : "small"}
       >
         <Modal.Content>
           {stationData ? (

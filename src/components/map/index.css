@@ -1,0 +1,21 @@
+.ui.segments .compact.segment {
+  background: none;
+  border: none;
+  box-shadow: none;
+  opacity: 0.5;
+  transition: opacity .5s ease-out;
+}
+
+.ui.segments .compact.segment:hover {
+  opacity: 1;
+}
+
+.right.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > input,
+.left.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > input {
+  border-radius: 5px;
+  text-align: center;
+}
+
+label {
+  margin-right: 10px;
+}
