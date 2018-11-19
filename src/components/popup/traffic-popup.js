@@ -96,6 +96,7 @@ class trafficModal extends Component {
                   selected={dateTo === "" ? null : dateTo}
                   onChange={(e) => this.handleDateChange('dateTo', e)}
                   placeholderText={moment().format('DD/MM/YYYY')}
+                  openToDate={dateFrom ? dateFrom : null}
                   todayButton={"Today"}
                   isClearable={true}
                   minDate={dateFrom ? dateFrom : null}
@@ -113,17 +114,24 @@ class trafficModal extends Component {
     // Function to assign colour code to heatmap
     const setColour = (data) => {
       if (data < 121 && data > 69) {
-        return 'green';
-      }
-      else if (data < 70 && data > 39) {
-        return 'yellow';
-      }
-      else if (data < 40 && data > 9) {
-        return 'orange';
-      }
-      else if (data < 10 && data > -71) {
         return 'red';
       }
+      else if (data < 70 && data > 39) {
+        return 'orange';
+      }
+      else if (data < 40 && data > 9) {
+        return 'yellow';
+      }
+      else if (data < 10 && data > -71) {
+        return 'green';
+      }
+    }
+
+    const isEmpty = (data) => {
+      if (!data) {
+        return '0';
+      }
+      return data;
     }
 
     // Render data set once it has been fetched 
@@ -143,13 +151,13 @@ class trafficModal extends Component {
         for (let n = 0; n < 24; n++) {
           hourDataCell.push(
             <Table.Cell key={n} className={setColour(data.hours[n < 10 ? `0${n}` : n])}>
-              {data.hours[n < 10 ? `0${n}` : n]}
+              {isEmpty(data.hours[n < 10 ? `0${n}` : n])}
             </Table.Cell>
         )}
         return (
           <Table.Row key={data.date}>
             <Table.Cell>{data.date}</Table.Cell>
-            {hourDataCell}
+              {hourDataCell}
           </Table.Row>
         );
       }); 
@@ -176,6 +184,7 @@ class trafficModal extends Component {
         closeIcon={true} 
         onClose={() => this.props.mapContainer.toggleModal()}
         size={stationData ? "fullscreen" : "small"}
+        dimmer='blurring'
       >
         <Modal.Content>
           {stationData ? (

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Segment, Dimmer, Loader, Grid } from 'semantic-ui-react';
+import { Segment, Dimmer, Loader, Grid, Message } from 'semantic-ui-react';
 import ReactMapboxGl, { Feature, Layer } from "react-mapbox-gl";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
@@ -21,8 +21,8 @@ class Map extends Component {
       station: null,
       stationName: null,
       popup: false,
-      dateFrom: '',
-      dateTo: ''
+      date: '',
+      error: null
     }
   }
 
@@ -33,8 +33,21 @@ class Map extends Component {
       this.setState({stationName});
       this.props.mapContainer.toggleModal();
     } else if (screen === 'weather') {
-      res = await this.props.mapContainer.getWeatherStationData(stationName);
-      this.setState({station: res, popup: true});
+      const { date } = this.state;
+      const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+      if (date) {
+        res = await this.props.mapContainer.getWeatherStationData(stationName, formattedDate);
+        if (res) {
+          this.setState({station: res});
+          this.togglePopup();
+        }
+        else {
+          this.setState({error: 'Please select a different date'}, 
+          () => {
+            setTimeout(() => this.setState({ error: null }), 4000);
+          })
+        }
+      }
     }
   };
 
@@ -49,7 +62,7 @@ class Map extends Component {
 
   render() {
     const { mapData, currentLocation, zoom, fetched, screen, modal } = this.props.mapContainer.state;
-    const { station, popup, stationName, dateFrom, dateTo } = this.state;
+    const { station, popup, stationName, date, error } = this.state;
 
     const image = new Image(50, 50);
     if (screen === 'traffic') {
@@ -80,7 +93,7 @@ class Map extends Component {
 
     const renderPopup = () => {
       if (screen === 'weather') {
-        return <WeatherPopup station={station} onClick={this.togglePopup} />
+        return <WeatherPopup station={station} onClick={this.togglePopup} open={popup} />
       }
     };
   
@@ -94,24 +107,20 @@ class Map extends Component {
       if (screen === 'weather') {
         return (
           <Segment compact>
-            <Grid columns={2} stackable>
+            <Grid columns={1} textAlign='center'>
               <Grid.Row>
-                <Grid.Column textAlign='right'>
-                  <label>Date from</label>
+                <Grid.Column textAlign='center'>
+                  <label>Date</label>
                   <DatePicker
-                    dateFormat="DD/MM/YYYY"
-                    selected={dateFrom === "" ? null : dateFrom}
-                    onChange={(e) => this.handleDateChange('dateFrom', e)}
+                    dateFormat="DD/MM/YYYY HH:mm"
+                    selected={date === "" ? null : date}
+                    onChange={(e) => this.handleDateChange('date', e)}
                     maxDate={moment()}
-                  />
-                </Grid.Column>
-                <Grid.Column textAlign='left'>
-                  <label>Date to</label>
-                  <DatePicker
-                    dateFormat="DD/MM/YYYY"
-                    selected={dateTo === "" ? null : dateTo}
-                    onChange={(e) => this.handleDateChange('dateTo', e)}
-                    maxDate={moment()}
+                    isClearable={true}
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={10}
+                    timeCaption="Time"
                   />
                 </Grid.Column>
               </Grid.Row>
@@ -119,6 +128,18 @@ class Map extends Component {
           </Segment>
         );
       }
+    };
+
+    const renderError = () => {
+      return (
+        <Grid columns={1} textAlign='center'>
+          <Grid.Row>
+            <Grid.Column textAlign='center'>
+              <Message error content={error} compact size='big' />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      );
     };
 
     
@@ -147,6 +168,9 @@ class Map extends Component {
             )}
             {modal && (
               renderModal()
+            )}
+            {error && (
+              renderError()
             )}
           </MapComponent>
         ) : (

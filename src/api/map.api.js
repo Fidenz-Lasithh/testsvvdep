@@ -20,10 +20,10 @@ const getData = async (component) => {
   return [null, res.data];
 };
 
-const getWeatherStationData = async (stationName) => {
+const getWeatherStationData = async (stationName, date) => {
   let err, res;
 
-  [err, res] = await to(APIHandler.get(`/api/v1/data/weather/${stationName}`));
+  [err, res] = await to(APIHandler.get(`/api/v1/data/weather/forecast/${stationName}?&date=${date}`));
 
   if (err) return [err, res];
   return [null, res.data];

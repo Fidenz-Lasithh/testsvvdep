@@ -10,10 +10,14 @@
   opacity: 1;
 }
 
-.right.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > input,
-.left.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > input {
+.center.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > input {
   border-radius: 5px;
   text-align: center;
+}
+
+.center.aligned.column > .react-datepicker-wrapper > .react-datepicker__input-container > button {
+  top: 15%;
+  right: 2px;
 }
 
 label {

@@ -167,13 +167,19 @@ class MapContainer extends Container {
     return mappedData;
   };
 
-  getWeatherStationData = async (stationName) => {
+  getWeatherStationData = async (stationName, date) => {
     let err, data;
 
     try {
-      [err, data] = await getWeatherStationData(stationName);
+      [err, data] = await getWeatherStationData(stationName, date);
       if (err) console.log(err);
-      return data;
+      else {
+        if (_.isEmpty(data)) {
+          return null;
+        } else {
+          return data;
+        }
+      };
     } catch (error) {
       console.log(error);
     }
