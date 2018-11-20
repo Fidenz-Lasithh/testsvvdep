@@ -16,7 +16,7 @@ const Routes = () => (
     <Route exact path='/traffic' component={Traffic} />
     <Route exact path='/plow-trucks' component={PlowTrucks} />
     <Route exact path='/friction' component={Friction} />
-    <Route exact path='/mp4' component={Videos} />
+    <Route exact path='/videos' component={Videos} />
     <Route exact path='/laser-data' component={LaserData} />
   </Segment>
 )

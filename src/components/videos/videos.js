@@ -1,28 +1,44 @@
 import React, { Component } from 'react';
-import { Menu, Checkbox } from 'semantic-ui-react';
+import { Menu, Checkbox, Dimmer } from 'semantic-ui-react';
+import VideoComponent from './videoComponent';
 
 class Videos extends Component {
 
-  handleClick = () => {
+  // async componentWillMount() {
+  //   await this.props.mapContainer.getData('videos');
+  // }
+  
+  handleToggle = () => {
     this.props.mapContainer.setToggle('toggleSpeedSigns');
   };
 
+  handleClick = () => {
+
+  };
+  
   render() {
-    const { toggleSpeedSigns } = this.props.mapContainer.state;
+    const { toggleSpeedSigns, mapData, fetched } = this.props.mapContainer.state;
+
+    const renderVideos = () => {
+      return <VideoComponent onClick={this.handleClick} />
+      // return mapData.features.map((data) => {
+      // });
+    };
 
     return (
-      <Menu vertical borderless size='huge'>
-        <Menu.Item>
-          <Checkbox toggle label='Enable' checked={toggleSpeedSigns === true} onClick={this.handleClick} />
-        </Menu.Item>
-        <Menu.Item header>
-          MP4
-        </Menu.Item>
-        <Menu.Item>Video 1</Menu.Item>
-        <Menu.Item>Video 2</Menu.Item>
-        <Menu.Item>Video 3</Menu.Item>
-        <Menu.Item>Video 4</Menu.Item>
-      </Menu>
+      // fetched ? (
+        <Menu vertical borderless size='huge'>
+          <Menu.Item>
+            <Checkbox toggle label='Enable' checked={toggleSpeedSigns === true} onClick={this.handleClick} />
+          </Menu.Item>
+          <Menu.Item header>
+            MP4
+          </Menu.Item>
+          {renderVideos()}
+        </Menu>
+      // ) : (
+      //   <Dimmer active inverted />
+      // )
     );
   }
 }

@@ -1,7 +1,8 @@
+import moment from 'moment';
 import _ from 'lodash';
 import { Container } from 'unstated';
 
-import { getData, getWeatherStationData, getTrafficStationData } from '../api/map.api';
+import { getData, getWeatherStationData, getTrafficStationData, getPlowTrucksData } from '../api/map.api';
 
 class MapContainer extends Container {
   state = {
@@ -20,6 +21,10 @@ class MapContainer extends Container {
     screen: null,
     modal: false,
     modalLoading: false,
+    errors: {
+      hasErrors: false,
+      message: null
+    },
     modalErrors: {
       hasErrors: false,
       message: null
@@ -31,6 +36,7 @@ class MapContainer extends Container {
       dateTo: null
     },
     stationData: null,
+    presetDate: null,
   };
 
   toggleModal = () => {
@@ -208,6 +214,63 @@ class MapContainer extends Container {
       };
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  // TODO: write a function to calculate colours for lines based on time entered in datepicker
+  // feed into json colour prop
+  getPlowTrucksData = async (date) => {
+    let err, data;
+
+    try {
+      this.setState({fetched: false});
+
+      [err, data] = await getPlowTrucksData(date);
+      if (err) console.log(err);
+      else {
+        if (_.isEmpty(data)) {
+          this.setState({
+            errors: {
+              hasErrors: true, 
+              message: "Please select a different date to display"
+            }
+          }, 
+          () => {
+            setTimeout(() => this.setState({ errors: {hasErrors: false, message: null} }), 4000);
+          })
+        } else {
+          const newObj = this.colourPlowTrucksData(data, date);
+          this.setState({data: newObj, presetDate: date}, () => this.readMapData('plow-trucks'));
+        }
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  colourPlowTrucksData = (plowTruckData, date) => {
+    let colouredPlowTrucksData = [];
+    
+    plowTruckData.features.map((data) => {
+      const colour = this.setColour(data.properties.time, date);
+      data.properties = {
+        ...data.properties,
+        color: colour
+      };
+      colouredPlowTrucksData.push(data);
+    });
+
+    return colouredPlowTrucksData;
+  };
+
+  setColour = (date, dateEntered) => {
+    const timeDifference = moment(dateEntered).subtract(date);
+    if (timeDifference < '2 hours') {
+      return 'green';
+    } else if (timeDifference > '2 hours' && timeDifference < '1 day') {
+      return 'yellow';
+    } else {
+      return 'red';
     }
   };
 }

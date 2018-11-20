@@ -3,6 +3,10 @@ import { Menu, Checkbox, Label } from 'semantic-ui-react';
 
 class PlowTrucks extends Component {
 
+  async componentWillMount() {
+    await this.props.mapContainer.getPlowTrucksData('2018/02/20 00:00');
+  }
+  
   handleClick = () => {
     this.props.mapContainer.setToggle('togglePlowTrucks');
   };

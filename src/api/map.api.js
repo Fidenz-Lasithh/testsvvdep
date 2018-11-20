@@ -38,4 +38,15 @@ const getTrafficStationData = async (stationName, dateFrom, dateTo, parameter) =
   return [null, res.data];
 }
 
-export { getData, getWeatherStationData, getTrafficStationData };
+
+const getPlowTrucksData = async (dateFrom) => {
+  let err, res;
+
+  [err, res] = await to(APIHandler.get(`/api/v1/data/winter?dateFrom=${dateFrom}`));
+  
+  if (err) return [err, res];
+  return [null, res.data];
+}
+
+
+export { getData, getWeatherStationData, getTrafficStationData, getPlowTrucksData };

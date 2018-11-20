@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Segment, Dimmer, Loader, Grid, Message } from 'semantic-ui-react';
+import { Segment, Dimmer, Loader, Grid, Message, Button } from 'semantic-ui-react';
 import ReactMapboxGl, { Feature, Layer } from "react-mapbox-gl";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
@@ -55,37 +55,71 @@ class Map extends Component {
     this.setState({[name]: date});
   };
 
+  handleDateEnter = async () => {
+    const { date } = this.state;
+
+    const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+    if (date) {
+      await this.props.mapContainer.getPlowTrucksData(formattedDate);
+      // if (res) {
+      //   this.setState({station: res});
+      //   this.togglePopup();
+      // }
+      // else {
+      //   this.setState({error: 'Please select a different date'}, 
+      //   () => {
+      //     setTimeout(() => this.setState({ error: null }), 4000);
+      //   })
+      // }
+    }
+  }
+
   togglePopup = () => {
     this.setState({popup: !this.state.popup});
   };
 
 
   render() {
-    const { mapData, currentLocation, zoom, fetched, screen, modal } = this.props.mapContainer.state;
+    const { mapData, currentLocation, zoom, fetched, screen, modal, presetDate, errors } = this.props.mapContainer.state;
     const { station, popup, stationName, date, error } = this.state;
 
-    const image = new Image(50, 50);
-    if (screen === 'traffic') {
-      image.src = trafficMarker;
-    } else if (screen === 'weather') {
-      image.src = weatherMarker;
+    // const images = {
+    //   weather: ["weather", image],
+    //   traffic: ["traffic", image]
+    // };
+    
+    const renderMarker = () => {
+      const image = new Image(50, 50);
+      if (screen === 'traffic') {
+        image.src = trafficMarker;
+      } else if (screen === 'weather') {
+        image.src = weatherMarker;
+      }
+      return [screen, image];
     }
-    const images = {
-      weather: ["weather", image],
-      traffic: ["traffic", image]
-    };
 
     const renderFeatures = () => {
       try {
-        return mapData.features.map((data) => {
-          return (
-            <Feature
-              key={screen === 'weather' ? data._id : data.properties.nr}
-              onClick={() => this.handleClick(screen === 'weather' ? data._id : data.properties.nr, screen)}
-              coordinates={data.geometry.coordinates}
-            />
-          )
-        })
+        if (screen === 'plow-trucks') {
+          return mapData.features.map((data) => {
+            return (
+              <Feature
+                key={data.id}
+                coordinates={data.geometry.coordinates}
+              />
+            );
+          });
+        } else if (screen === 'weather' || screen === 'traffic') {
+          return mapData.features.map((data) => {
+            return (
+              <Feature
+                key={screen === 'weather' ? data._id : data.properties.nr}
+                onClick={() => this.handleClick(screen === 'weather' ? data._id : data.properties.nr, screen)}
+                coordinates={data.geometry.coordinates}
+              />
+            );
+          });
+        };
       } catch (error) {
         console.log(error);
       }
@@ -104,7 +138,13 @@ class Map extends Component {
     };
 
     const renderDatePicker = () => {
-      if (screen === 'weather') {
+      const setDate = () => {
+        if (presetDate) return moment(presetDate).format('DD/MM/YYYY HH:mm');
+        else if (date === "") return null;
+        else return date;
+      };
+
+      if (screen === 'weather' || screen === 'plow-trucks') {
         return (
           <Segment compact>
             <Grid columns={1} textAlign='center'>
@@ -113,7 +153,7 @@ class Map extends Component {
                   <label>Date</label>
                   <DatePicker
                     dateFormat="DD/MM/YYYY HH:mm"
-                    selected={date === "" ? null : date}
+                    selected={setDate()}
                     onChange={(e) => this.handleDateChange('date', e)}
                     maxDate={moment()}
                     isClearable={true}
@@ -122,6 +162,11 @@ class Map extends Component {
                     timeIntervals={10}
                     timeCaption="Time"
                   />
+                  {(screen === 'plow-trucks') ? (
+                    <Button onClick={this.handleDateEnter}>Display</Button>
+                  ) : (
+                    null
+                  )}
                 </Grid.Column>
               </Grid.Row>
             </Grid>
@@ -142,42 +187,65 @@ class Map extends Component {
       );
     };
 
+    const renderLayer = () => {
+      if (screen === 'plow-trucks') {
+        return (
+          <Layer
+            type="line"
+            layout={{
+              'line-cap': 'round',
+              'line-join': 'round'
+            }}
+            paint={{
+              'line-width': 12,
+              'line-color': 'blue'
+            }}
+          >
+            {renderFeatures()}
+          </Layer>
+        );
+      } else {
+        return (
+          <Layer
+            type="symbol"
+            images={renderMarker()}
+            layout={{ "icon-image": `${screen}`, "icon-allow-overlap": true }}
+          >
+            {renderFeatures()}
+          </Layer>
+        );
+      }
+    };
     
     return (
       <Segment floated='right' size='large'>
-        {fetched ? (
+        {/* {fetched ? ( */}
           <MapComponent
             style="mapbox://styles/mapbox/streets-v8"
-            zoom={zoom ? zoom : [3]}
-            center={currentLocation ? currentLocation : [10.6943854, 61.0054288]}
+            zoom={zoom ? zoom : [6]}
+            center={currentLocation ? currentLocation : [20.205902, 69.414571]}
             containerStyle={{
               'height': '100%',
               'width': '100%'
             }}
           >
             {renderDatePicker()}
-            <Layer
-              type="symbol"
-              images={images[screen]}
-              layout={{ "icon-image": `${screen}`, "icon-allow-overlap": true }}
-            >
-              {renderFeatures()}
-            </Layer>
+            {renderLayer()}
             {popup && (
               renderPopup()
             )}
             {modal && (
               renderModal()
             )}
-            {error && (
+            {(error || errors.hasErrors) && (
               renderError()
             )}
           </MapComponent>
-        ) : (
+        {/* ) : (
           <Dimmer active inverted>
             <Loader size='big'>Loading...</Loader>
           </Dimmer>
-        )}
+        )} */}
       </Segment>
     )
   }
