@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Modal, Grid, Header } from 'semantic-ui-react';
-
+import { Modal, Grid, Header, Label } from 'semantic-ui-react';
+import moment from 'moment';
 
 class WeatherPopup extends Component {
   render() {
@@ -18,9 +18,11 @@ class WeatherPopup extends Component {
           <Grid columns={1} textAlign='center'>
             <Grid.Row>
               <Grid.Column>
+                <Label color='red' size='big'>
+                  {moment(station.properties['Tidspunkt']['$date']).format("DD/MM/YYYY HH:mm")}
+                </Label>
                 <Header as='h4'>{station.properties.measurement_station.name}</Header>
-                <Header as='h4'>{station.properties['Tidspunkt']}</Header>
-                <p>Air temperature (C): {station.properties['Lufttemperatur (§C)']}</p>
+                <p>Air temperature (C): {station.properties['Lufttemperatur (�C)']}</p>
                 <p>Quality: {station.properties['Kvalitet']}</p>
                 <p>Relative humidity (%): {station.properties['Relativ luftfuktighet (%)']}</p>
                 <p>Roadway temperature (C): {station.properties['Vegbanetemperatur (§C)']}</p>

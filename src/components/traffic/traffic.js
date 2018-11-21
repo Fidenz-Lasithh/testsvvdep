@@ -21,9 +21,11 @@ class Traffic extends Component {
     const { toggleTraffic, data, fetched } = this.props.mapContainer.state;
 
     const renderTrafficEquipment = () => {
-      return data.features.map((data) => {
-        return <TrafficEquipment key={data._id} station={data} onClick={this.handleClick} />
-      });
+      if (data) {
+        return data.features.map((data) => {
+          return <TrafficEquipment key={data._id} station={data} onClick={this.handleClick} />
+        });
+      }
     };
 
     return (

@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { Menu, Checkbox, Label } from 'semantic-ui-react';
+import moment from 'moment';
+
+import './index.css';
 
 class PlowTrucks extends Component {
 
   async componentWillMount() {
-    await this.props.mapContainer.getPlowTrucksData('2018/02/20 00:00');
+    await this.props.mapContainer.getPlowTrucksData(moment(new Date()).format('YYYY/MM/DD HH:mm'));
   }
   
   handleClick = () => {

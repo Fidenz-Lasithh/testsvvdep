@@ -21,9 +21,11 @@ class Weather extends Component {
     const { toggleWeather, data, fetched } = this.props.mapContainer.state;
     
     const renderWeatherStations = () => {
-      return data.features.map((data) => {
-        return <WeatherStation key={data._id} station={data} onClick={this.handleClick} />
-      });
+      if (data) {
+        return data.features.map((data) => {
+          return <WeatherStation key={data._id} station={data} onClick={this.handleClick} />
+        });
+      }
     };
 
     return (

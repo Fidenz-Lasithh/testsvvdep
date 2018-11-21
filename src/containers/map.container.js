@@ -109,7 +109,51 @@ class MapContainer extends Container {
       console.log(error);
     }
   };
+  
+  // Setting weather or traffic marker for points on map
+  // setMarker = (component) => {
+    //   const image = new Image(50, 50);
+    
+    //   if (component === 'traffic') {
+      //     image.src = trafficMarker;
+  //   } else if (component === 'weather') {
+    //     image.src = weatherMarker;
+    //   }
+  //   return [component, image];
+  // }
+  
+  setTarget = (id) => {
+    const { mapData } = this.state;
+    let target, location;
+    
+    try {
+      target = _.find(mapData.features, {'_id': id});
+      // if (_.isArray(mapData)) {
+        // } else {
+          //   target = mapData;
+      // }
+      location = target.geometry.coordinates;
+      this.setState({currentLocation: location, zoom: [14]});
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  getData = async (component) => {
+    let err, data;
+    
+    try {
+      this.setState({fetched: false});
 
+      [err, data] = await getData(component);
+      if (err) console.log(err);
+      
+      this.setState({data: data}, () => this.readMapData(component));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
   // TODO: Function to combine data from current screen and from other enabled screens
   readMapData = async (component) => {
     const { data } = this.state;
@@ -127,50 +171,6 @@ class MapContainer extends Container {
     // console.log(mapData);
     // const marker = this.setMarker(component);
     this.setState({mapData: data, fetched: true, screen: component});
-  };
-
-  // Setting weather or traffic marker for points on map
-  // setMarker = (component) => {
-  //   const image = new Image(50, 50);
-
-  //   if (component === 'traffic') {
-  //     image.src = trafficMarker;
-  //   } else if (component === 'weather') {
-  //     image.src = weatherMarker;
-  //   }
-  //   return [component, image];
-  // }
-
-  setTarget = (id) => {
-    const { mapData } = this.state;
-    let target, location;
-
-    try {
-      target = _.find(mapData.features, {'_id': id});
-      // if (_.isArray(mapData)) {
-      // } else {
-      //   target = mapData;
-      // }
-      location = target.geometry.coordinates;
-      this.setState({currentLocation: location, zoom: [14]});
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  getData = async (component) => {
-    let err, data;
-
-    try {
-      this.setState({fetched: false});
-
-      [err, data] = await getData(component);
-      if (err) console.log(err);
-
-      this.setState({data: data}, () => this.readMapData(component));
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   mapData = (data) => {
@@ -227,7 +227,7 @@ class MapContainer extends Container {
             modalLoading: false, 
             modalErrors: {
               hasErrors: true, 
-              message: "Please select a different date range"
+              message: "There is no data available. Please select a different date range"
             }
           })
         } else {
@@ -239,8 +239,6 @@ class MapContainer extends Container {
     }
   };
 
-  // TODO: write a function to calculate colours for lines based on time entered in datepicker
-  // feed into json colour prop
   getPlowTrucksData = async (date) => {
     let err, data;
 
@@ -250,14 +248,17 @@ class MapContainer extends Container {
       [err, data] = await getPlowTrucksData(date);
       if (err) console.log(err);
       else {
-        if (_.isEmpty(data)) {
+        if (_.isEmpty(data.features)) {
           this.setState({
             errors: {
               hasErrors: true, 
-              message: "Please select a different date to display"
-            }
+              message: "The current selected date has no data available"
+            },
+            data: null,
+            presetDate: date
           }, 
           () => {
+            this.readMapData('plow-trucks');
             setTimeout(() => this.setState({ errors: {hasErrors: false, message: null} }), 4000);
           })
         } else {
@@ -271,28 +272,41 @@ class MapContainer extends Container {
   };
 
   colourPlowTrucksData = (plowTruckData, date) => {
-    let colouredPlowTrucksData = [];
-    
+    let features = [];
+
     plowTruckData.features.map((data) => {
-      const colour = this.setColour(data.properties.time, date);
-      data.properties = {
-        ...data.properties,
-        color: colour
-      };
-      colouredPlowTrucksData.push(data);
+      const colour = this.setColour(data.properties.time.$date, date);
+      
+      data = {
+        ...data,
+        properties: {
+          ...data.properties,
+          color: colour
+        }
+      }
+      
+      return features.push(data);
     });
 
+    let colouredPlowTrucksData = 
+      {
+        features: features,
+        type: "FeatureCollection"
+      }
+    
     return colouredPlowTrucksData;
   };
 
   setColour = (date, dateEntered) => {
-    const timeDifference = moment(dateEntered).subtract(date);
-    if (timeDifference < '2 hours') {
-      return 'green';
-    } else if (timeDifference > '2 hours' && timeDifference < '1 day') {
-      return 'yellow';
-    } else {
-      return 'red';
+    const momentDate = moment(new Date(dateEntered));
+    const timeDifference = (moment.duration(momentDate.diff(date))).asHours();
+
+    if (timeDifference < 2) {
+      return '#2cb84b';
+    } else if (timeDifference > 2 && timeDifference < 24) {
+      return '#ffff00';
+    } else if (timeDifference > 24) {
+      return '#F7455D';
     }
   };
 }

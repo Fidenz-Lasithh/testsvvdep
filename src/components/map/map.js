@@ -43,11 +43,16 @@ class Map extends Component {
           this.togglePopup();
         }
         else {
-          this.setState({error: 'Please select a different date'}, 
+          this.setState({error: 'There is no data available. Please select a different date'}, 
           () => {
             setTimeout(() => this.setState({ error: null }), 4000);
           })
         }
+      } else {
+          this.setState({error: 'Please select a date to view historical data'}, 
+          () => {
+            setTimeout(() => this.setState({ error: null }), 4000);
+          })
       }
     }
   };
@@ -58,20 +63,10 @@ class Map extends Component {
 
   handleDateEnter = async () => {
     const { date } = this.state;
-
     const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+
     if (date) {
       await this.props.mapContainer.getPlowTrucksData(formattedDate);
-      // if (res) {
-      //   this.setState({station: res});
-      //   this.togglePopup();
-      // }
-      // else {
-      //   this.setState({error: 'Please select a different date'}, 
-      //   () => {
-      //     setTimeout(() => this.setState({ error: null }), 4000);
-      //   })
-      // }
     }
   }
 
@@ -83,11 +78,6 @@ class Map extends Component {
   render() {
     const { mapData, currentLocation, zoom, fetched, screen, modal, presetDate, errors, showVideoPlayer } = this.props.mapContainer.state;
     const { station, popup, stationName, date, error } = this.state;
-
-    // const images = {
-    //   weather: ["weather", image],
-    //   traffic: ["traffic", image]
-    // };
     
     const renderMarker = () => {
       const image = new Image(50, 50);
@@ -102,14 +92,19 @@ class Map extends Component {
     const renderFeatures = () => {
       try {
         if (screen === 'plow-trucks') {
-          return mapData.features.map((data) => {
-            return (
-              <Feature
-                key={data.id}
-                coordinates={data.geometry.coordinates}
-              />
-            );
-          });
+          // Check if map data is empty because plow-trucks screen is first loaded without map data
+          if (mapData) {
+            return mapData.features.map((data) => {
+              return (
+                <Feature
+                  key={data.id}
+                  coordinates={data.geometry.coordinates}
+                />
+              );
+            });
+          } else {
+            return null;
+          }
         } else if (screen === 'weather' || screen === 'traffic') {
           return mapData.features.map((data) => {
             return (
@@ -145,12 +140,6 @@ class Map extends Component {
     };
 
     const renderDatePicker = () => {
-      const setDate = () => {
-        if (presetDate) return moment(presetDate).format('DD/MM/YYYY HH:mm');
-        else if (date === "") return null;
-        else return date;
-      };
-
       if (screen === 'weather' || screen === 'plow-trucks') {
         return (
           <Segment compact>
@@ -160,7 +149,7 @@ class Map extends Component {
                   <label>Date</label>
                   <DatePicker
                     dateFormat="DD/MM/YYYY HH:mm"
-                    selected={setDate()}
+                    selected={date === "" ? null : date}
                     onChange={(e) => this.handleDateChange('date', e)}
                     maxDate={moment()}
                     isClearable={true}
@@ -168,6 +157,7 @@ class Map extends Component {
                     timeFormat="HH:mm"
                     timeIntervals={10}
                     timeCaption="Time"
+                    placeholderText={presetDate}
                   />
                   {(screen === 'plow-trucks') ? (
                     <Button onClick={this.handleDateEnter}>Display</Button>
@@ -187,12 +177,26 @@ class Map extends Component {
         <Grid columns={1} textAlign='center'>
           <Grid.Row>
             <Grid.Column textAlign='center'>
-              <Message error content={error} compact size='big' />
+              <Message error content={error || errors.message} compact size='big' />
             </Grid.Column>
           </Grid.Row>
         </Grid>
       );
     };
+
+    const mapFeatures = (mapData) => {
+      let color;
+      if (mapData) {
+        mapData.features.map((feature) => {
+          return color = feature.properties.color;
+        });
+      }
+
+      if (!color) {
+        return 'black';
+      }
+      return color;
+    }
 
     const renderLayer = () => {
       if (screen === 'plow-trucks') {
@@ -204,8 +208,8 @@ class Map extends Component {
               'line-join': 'round'
             }}
             paint={{
-              'line-width': 12,
-              'line-color': 'blue'
+              'line-width': 10,
+              'line-color': mapFeatures(mapData)
             }}
           >
             {renderFeatures()}
@@ -223,7 +227,7 @@ class Map extends Component {
         );
       }
     };
-    
+
     return (
       <Segment floated='right' size='large'>
         {fetched ? (
