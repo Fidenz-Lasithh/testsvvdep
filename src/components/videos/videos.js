@@ -7,20 +7,35 @@ class Videos extends Component {
   // async componentWillMount() {
   //   await this.props.mapContainer.getData('videos');
   // }
+  constructor() {
+    super();
+
+    this.state = {
+      popup: false
+    }
+  }
   
   handleToggle = () => {
     this.props.mapContainer.setToggle('toggleSpeedSigns');
   };
 
-  handleClick = () => {
-
+  handleClick = (data, {content}) => {
+    if (content === 'Play video') {
+      this.togglePopup();
+      this.props.mapContainer.toggleVideoPlayer();
+    }
   };
+
+  togglePopup = () => {
+    this.setState({popup: !this.state.popup}, () => console.log(this.state.popup));
+  }
   
   render() {
-    const { toggleSpeedSigns, mapData, fetched } = this.props.mapContainer.state;
+    const { toggleSpeedSigns, mapData, fetched, showVideoPlayer } = this.props.mapContainer.state;
+    const { popup } = this.state;
 
     const renderVideos = () => {
-      return <VideoComponent onClick={this.handleClick} />
+      return <VideoComponent onClick={this.handleClick} togglePopup={this.togglePopup} popup={popup} />
       // return mapData.features.map((data) => {
       // });
     };

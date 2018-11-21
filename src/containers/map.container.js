@@ -37,6 +37,11 @@ class MapContainer extends Container {
     },
     stationData: null,
     presetDate: null,
+    showVideoPlayer: false,
+    // markers: {
+    //   traffic: null,
+    //   weather: null
+    // }
   };
 
   toggleModal = () => {
@@ -76,6 +81,10 @@ class MapContainer extends Container {
       console.log(error);
     }
   };
+
+  toggleVideoPlayer = () => {
+    this.setState({showVideoPlayer: !this.state.showVideoPlayer});
+  }
   
   addToMap = (data, tabName) => {
     const { storedData } = this.state;
@@ -116,8 +125,21 @@ class MapContainer extends Container {
 
     // mapData = _.concat(mapData, data);
     // console.log(mapData);
+    // const marker = this.setMarker(component);
     this.setState({mapData: data, fetched: true, screen: component});
   };
+
+  // Setting weather or traffic marker for points on map
+  // setMarker = (component) => {
+  //   const image = new Image(50, 50);
+
+  //   if (component === 'traffic') {
+  //     image.src = trafficMarker;
+  //   } else if (component === 'weather') {
+  //     image.src = weatherMarker;
+  //   }
+  //   return [component, image];
+  // }
 
   setTarget = (id) => {
     const { mapData } = this.state;

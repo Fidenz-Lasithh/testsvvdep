@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import WeatherPopup from '../popup/weather-popup';
 import TrafficPopup from '../popup/modal';
+import VideoPlayer from '../popup/videoPlayer';
 import trafficMarker from '../../assets/markers/traffic_counting.svg';
 import weatherMarker from '../../assets/markers/weather_data.svg';
 
@@ -80,7 +81,7 @@ class Map extends Component {
 
 
   render() {
-    const { mapData, currentLocation, zoom, fetched, screen, modal, presetDate, errors } = this.props.mapContainer.state;
+    const { mapData, currentLocation, zoom, fetched, screen, modal, presetDate, errors, showVideoPlayer } = this.props.mapContainer.state;
     const { station, popup, stationName, date, error } = this.state;
 
     // const images = {
@@ -130,11 +131,17 @@ class Map extends Component {
         return <WeatherPopup station={station} onClick={this.togglePopup} open={popup} />
       }
     };
-  
+      
     const renderModal = () => {
       if (screen === 'traffic') {
         return <TrafficPopup stationName={stationName} />
       }
+    };
+    
+    const renderVideoPlayer = () => {
+      // if (screen === 'videos') {
+        return <VideoPlayer mapContainer={this.props.mapContainer} />
+      // }
     };
 
     const renderDatePicker = () => {
@@ -219,7 +226,7 @@ class Map extends Component {
     
     return (
       <Segment floated='right' size='large'>
-        {/* {fetched ? ( */}
+        {fetched ? (
           <MapComponent
             style="mapbox://styles/mapbox/streets-v8"
             zoom={zoom ? zoom : [6]}
@@ -237,15 +244,18 @@ class Map extends Component {
             {modal && (
               renderModal()
             )}
+            {showVideoPlayer && (
+              renderVideoPlayer()
+            )}
             {(error || errors.hasErrors) && (
               renderError()
             )}
           </MapComponent>
-        {/* ) : (
+        ) : (
           <Dimmer active inverted>
             <Loader size='big'>Loading...</Loader>
           </Dimmer>
-        )} */}
+        )}
       </Segment>
     )
   }

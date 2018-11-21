@@ -18,6 +18,7 @@ class WeatherPopup extends Component {
           <Grid columns={1} textAlign='center'>
             <Grid.Row>
               <Grid.Column>
+                <Header as='h4'>{station.properties.measurement_station.name}</Header>
                 <Header as='h4'>{station.properties['Tidspunkt']}</Header>
                 <p>Air temperature (C): {station.properties['Lufttemperatur (§C)']}</p>
                 <p>Quality: {station.properties['Kvalitet']}</p>
