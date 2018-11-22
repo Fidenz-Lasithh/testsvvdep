@@ -7,7 +7,7 @@ import './index.css';
 class PlowTrucks extends Component {
 
   async componentWillMount() {
-    await this.props.mapContainer.getPlowTrucksData(moment(new Date()).format('YYYY/MM/DD HH:mm'));
+    await this.props.mapContainer.getPlowTrucksData(moment(new Date()).valueOf());
   }
   
   handleClick = () => {

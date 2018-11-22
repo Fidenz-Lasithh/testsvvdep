@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import { Menu, Checkbox, Label } from 'semantic-ui-react';
+import moment from 'moment';
 
 class Friction extends Component {
+
+  async componentWillMount() {
+    await this.props.mapContainer.getFrictionData(moment(new Date()).valueOf());
+  }
 
   handleClick = () => {
     this.props.mapContainer.setToggle('toggleFriction');

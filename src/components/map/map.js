@@ -35,9 +35,9 @@ class Map extends Component {
       this.props.mapContainer.toggleModal();
     } else if (screen === 'weather') {
       const { date } = this.state;
-      const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+      const timestamp = moment(date).valueOf();
       if (date) {
-        res = await this.props.mapContainer.getWeatherStationData(stationName, formattedDate);
+        res = await this.props.mapContainer.getWeatherStationData(stationName, timestamp);
         if (res) {
           this.setState({station: res});
           this.togglePopup();
@@ -60,13 +60,24 @@ class Map extends Component {
   handleDateChange = (name, date) => {
     this.setState({[name]: date});
   };
-
-  handleDateEnter = async () => {
+  
+  handleDateEnter = async (screen) => {
     const { date } = this.state;
-    const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+    // const formattedDate = moment(date).format('YYYY/MM/DD HH:mm');
+    const timestamp = moment(date).valueOf();
 
     if (date) {
-      await this.props.mapContainer.getPlowTrucksData(formattedDate);
+      console.log(moment(date).format('DD/MM/YYYY HH:mm'))
+      if (screen === 'plow-trucks') {
+        await this.props.mapContainer.getPlowTrucksData(timestamp);
+      } else if (screen === 'friction') {
+        await this.props.mapContainer.getFrictionData(timestamp);
+      }
+    } else {
+      this.setState({error: 'Please select a date to view historical data'}, 
+      () => {
+        setTimeout(() => this.setState({ error: null }), 4000);
+      })
     }
   }
 
@@ -91,9 +102,10 @@ class Map extends Component {
 
     const renderFeatures = () => {
       try {
-        if (screen === 'plow-trucks') {
+        if (screen === 'plow-trucks' || screen === 'friction') {
           // Check if map data is empty because plow-trucks screen is first loaded without map data
           if (mapData) {
+            console.log(mapData)
             return mapData.features.map((data) => {
               return (
                 <Feature
@@ -140,7 +152,7 @@ class Map extends Component {
     };
 
     const renderDatePicker = () => {
-      if (screen === 'weather' || screen === 'plow-trucks') {
+      if (screen === 'weather' || screen === 'plow-trucks' || screen === 'friction') {
         return (
           <Segment compact>
             <Grid columns={1} textAlign='center'>
@@ -159,8 +171,8 @@ class Map extends Component {
                     timeCaption="Time"
                     placeholderText={presetDate}
                   />
-                  {(screen === 'plow-trucks') ? (
-                    <Button onClick={this.handleDateEnter}>Display</Button>
+                  {(screen === 'plow-trucks' || screen === 'friction') ? (
+                    <Button onClick={() => this.handleDateEnter(screen)}>Display</Button>
                   ) : (
                     null
                   )}
@@ -184,10 +196,13 @@ class Map extends Component {
       );
     };
 
-    const mapFeatures = (mapData) => {
+    const getColour = (mapData) => {
       let color;
+      // console.log('sfsf')
+      // console.log(mapData)
       if (mapData) {
         mapData.features.map((feature) => {
+          // console.log(feature.properties.color);
           return color = feature.properties.color;
         });
       }
@@ -195,6 +210,7 @@ class Map extends Component {
       if (!color) {
         return 'black';
       }
+      console.log(color)
       return color;
     }
 
@@ -209,7 +225,19 @@ class Map extends Component {
             }}
             paint={{
               'line-width': 10,
-              'line-color': mapFeatures(mapData)
+              'line-color': getColour(mapData)
+            }}
+          >
+            {renderFeatures()}
+          </Layer>
+        );
+      } else if (screen === 'friction') {
+        return (
+          <Layer
+            type="circle"
+            paint={{
+              'circle-radius': 20,
+              'circle-color': getColour(mapData)
             }}
           >
             {renderFeatures()}

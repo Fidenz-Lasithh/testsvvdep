@@ -32,8 +32,8 @@ class trafficModal extends Component {
   handleSubmit = () => {
     const { param, dateFrom, dateTo } = this.state;
     const { stationName } = this.props;
-    const from = moment(dateFrom).format('YYYY/MM/DD');
-    const to = moment(dateTo).format('YYYY/MM/DD');
+    const from = moment(dateFrom).valueOf();
+    const to = moment(dateTo).valueOf();
 
     if (param && dateFrom && dateTo) {
       this.props.mapContainer.setModalParams(stationName, param, from, to);

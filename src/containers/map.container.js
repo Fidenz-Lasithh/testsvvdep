@@ -2,7 +2,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { Container } from 'unstated';
 
-import { getData, getWeatherStationData, getTrafficStationData, getPlowTrucksData } from '../api/map.api';
+import { getData, getWeatherStationData, getTrafficStationData, getPlowTrucksData, getFrictionData } from '../api/map.api';
 
 class MapContainer extends Container {
   state = {
@@ -243,7 +243,7 @@ class MapContainer extends Container {
     let err, data;
 
     try {
-      this.setState({fetched: false});
+      this.setState({fetched: false, currentLocation: null, zoom: null});
 
       [err, data] = await getPlowTrucksData(date);
       if (err) console.log(err);
@@ -255,14 +255,14 @@ class MapContainer extends Container {
               message: "The current selected date has no data available"
             },
             data: null,
-            presetDate: date
+            presetDate: moment(date).format('DD/MM/YYYY HH:mm')
           }, 
           () => {
             this.readMapData('plow-trucks');
             setTimeout(() => this.setState({ errors: {hasErrors: false, message: null} }), 4000);
           })
         } else {
-          const newObj = this.colourPlowTrucksData(data, date);
+          const newObj = this.setColourProperty('plow-trucks', data, date);
           this.setState({data: newObj, presetDate: date}, () => this.readMapData('plow-trucks'));
         }
       };
@@ -270,12 +270,49 @@ class MapContainer extends Container {
       console.log(error);
     }
   };
+// 12/04/2018 17:30
+  getFrictionData = async (date) => {
+    let err, data;
 
-  colourPlowTrucksData = (plowTruckData, date) => {
+    try {
+      this.setState({fetched: false, currentLocation: null, zoom: null});
+
+      [err, data] = await getFrictionData(date);
+      if (err) console.log(err);
+      else {
+        if (_.isEmpty(data.features)) {
+          this.setState({
+            errors: {
+              hasErrors: true, 
+              message: "The current selected date has no data available"
+            },
+            data: null,
+            presetDate: moment(date).format('DD/MM/YYYY HH:mm')
+          }, 
+          () => {
+            this.readMapData('friction');
+            setTimeout(() => this.setState({ errors: {hasErrors: false, message: null} }), 4000);
+          })
+        } else {
+          const newObj = this.setColourProperty('friction', data, date);
+          this.setState({data: newObj, presetDate: date}, () => this.readMapData('friction'));
+        }
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  setColourProperty = (screen, dataObj, date) => {
     let features = [];
+    let colour;
 
-    plowTruckData.features.map((data) => {
-      const colour = this.setColour(data.properties.time.$date, date);
+    dataObj.features.map((data) => {
+      if (screen === 'plow-trucks') {
+        colour = this.setColour('plow-trucks', data.properties, date);
+      } else if (screen === 'friction') {
+        colour = this.setColour('friction', data.properties);
+      }
       
       data = {
         ...data,
@@ -288,26 +325,39 @@ class MapContainer extends Container {
       return features.push(data);
     });
 
-    let colouredPlowTrucksData = 
+    let colouredDataObj = 
       {
         features: features,
         type: "FeatureCollection"
       }
     
-    return colouredPlowTrucksData;
+    return colouredDataObj;
   };
 
-  setColour = (date, dateEntered) => {
-    const momentDate = moment(new Date(dateEntered));
-    const timeDifference = (moment.duration(momentDate.diff(date))).asHours();
+  setColour = (screen, properties, dateEntered) => {
+    if (screen === 'plow-trucks') {
+      const date = properties.time['$date'];
+      const momentDate = moment(new Date(dateEntered));
+      const timeDifference = (moment.duration(momentDate.diff(date))).asHours();
+  
+      if (timeDifference < 2) {
+        return '#2cb84b';
+      } else if (timeDifference > 2 && timeDifference < 24) {
+        return '#ffff00';
+      } else if (timeDifference > 24) {
+        return '#F7455D';
+      }
+    } else if (screen === 'friction') {
+      const friction = properties.friction;
 
-    if (timeDifference < 2) {
-      return '#2cb84b';
-    } else if (timeDifference > 2 && timeDifference < 24) {
-      return '#ffff00';
-    } else if (timeDifference > 24) {
-      return '#F7455D';
-    }
+      if (friction > 0 && friction < 0.26) {
+        return '#2cb84b';
+      } else if (friction > 0.26 && friction < 0.52) {
+        return '#ffff00';
+      } else if (friction > 0.52 && friction < 0.81) {
+        return '#F7455D'
+      }
+    } 
   };
 }
 
