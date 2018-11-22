@@ -73,6 +73,8 @@ echo Handling react app deployment.
 # 1. Install npm packages
 if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
   cd "$DEPLOYMENT_SOURCE"
+  echo "setting ssl NO strict"
+  npm config set strict-ssl false
   echo "Running npm install"
   eval npm install
   exitWithMessageOnError "npm failed"
